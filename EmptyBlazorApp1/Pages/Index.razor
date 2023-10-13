@@ -1,0 +1,11 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization;
+
+@if (!IsAutorized) {
+    <LoginComponent />
+}
+
+@code {
+    [Parameter]
+    public bool IsAutorized { get; set; } = false;
+}
