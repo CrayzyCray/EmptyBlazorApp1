@@ -6,7 +6,7 @@
 @using System.Security.Cryptography;
 @using System.Text;
 
-@inject DbService dbService
+@inject AccountService AccountService
 
 
 <MudTabs Elevation="4" Rounded="true" Centered="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
@@ -28,52 +28,26 @@
 
 @code {
     [Parameter]
-    public Action<User>? action { get; set; }
+    public Action<User>? OnLoginSuccess { get; set; }
     public string Login { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 
     private void LoginButtonOnClick() {
-        var user = dbService.DbContext.Users.FirstOrDefault(u => u.Login == Login);
-        if (user is null)
-            return;
-
-        action?.Invoke(user);
-
-        Console.WriteLine(Login);
+        var result = AccountService.TryAuthorize(Login, Password);
+        if (result.Item1 is User user) {
+            OnLoginSuccess?.Invoke(user);
+        } else {
+            Console.WriteLine(result.Item2);
+        }
     }
 
     private void RegisterButtonOnClick() {
-        string salt = GenerateSalt();
-        var hash = GenerateSaltedHash(Password, salt);
-
-
-
-        var user = new User() { Login = Login, Password = hash, Salt = salt };
-        dbService.DbContext.Users.Add(user);
-        dbService.DbContext.SaveChanges();
-    }
-
-    string GenerateSalt() {
-        string salt;
-        using (var cryptoProvider = new RNGCryptoServiceProvider()) {
-            byte[] bytes = new byte[8];
-            cryptoProvider.GetBytes(bytes);
-
-            salt = Convert.ToBase64String(bytes);
+        var result = AccountService.TryRegister(Login, Password);
+        if (result.Item1 is User user) {
+            OnLoginSuccess?.Invoke(user);
+        } else {
+            Console.WriteLine(result.Item2);
         }
-        return salt;
-    }
-
-    byte[] GenerateSaltedHash(string password, string salt) {
-        var a = SHA256.Create();
-        var hash = a.ComputeHash(Encoding.UTF8.GetBytes(password + salt));
-        a.Dispose();
-        return hash;
-    }
-
-    bool ValidatePassword(string password, string salt, byte[] passwordHash) {
-        var _hash = GenerateSaltedHash(password, salt);
-        return passwordHash.SequenceEqual(_hash);
     }
 
 }

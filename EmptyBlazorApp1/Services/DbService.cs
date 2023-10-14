@@ -1,14 +1,13 @@
 ﻿using EmptyBlazorApp1.Entities;
-using Microsoft.EntityFrameworkCore;
 
-namespace EmptyBlazorApp1.Services {
-    public class DbService {
-        public AppDbContext DbContext => _context;
+namespace EmptyBlazorApp1.Services;
 
-        AppDbContext _context;
+public class DbService {
+    public AppDbContext DbContext => _context;
 
-        public DbService() {
-            _context = new();
-        }
+    AppDbContext _context;
+
+    public DbService() {
+        _context = new();
     }
 }

@@ -5,13 +5,9 @@
 @if (_user is User user) {
     <Logined User="@user" />
 } else {
-    <LoginComponent action="(u) => {_user = u; StateHasChanged();}" />
+    <LoginComponent OnLoginSuccess="(u) => {_user = u; StateHasChanged();}" />
 }
 
 @code {
-    
-    [Parameter]
-    public bool IsAutorized { get; set; } = false;
-    [Parameter]
     public User? _user { get; set; }
 }

@@ -14,8 +14,9 @@ services.AddScoped<ProtectedSessionStorage>();
 services.AddMudServices();
 
 services.AddSingleton<DbService>();
+services.AddSingleton<AccountService>();
 
-services.AddHttpContextAccessor();
+//services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
