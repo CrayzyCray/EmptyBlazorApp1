@@ -9,6 +9,7 @@ public class AppDbContext : DbContext {
 
     public AppDbContext() {
         Console.WriteLine("AppDbContext ctor");
+        Database.EnsureDeleted();
         Database.EnsureCreated();
     }
 

@@ -1,0 +1,10 @@
+﻿@using EmptyBlazorApp1.Entities
+<h3>Logined</h3>
+@if (User is User user) {
+    <h3>@user.Password</h3>
+}
+
+@code {
+    [Parameter]
+    public User User { get; set; }
+}
