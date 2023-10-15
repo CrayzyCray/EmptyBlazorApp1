@@ -1,14 +1,26 @@
 ﻿@page "/"
-@using Microsoft.AspNetCore.Components.Authorization;
 @using EmptyBlazorApp1.Entities
 
-@if (_user is User user) {
-    <Logined User="@user" />
-} else {
-    <LoginComponent OnLoginSuccess="(u) => {_user = u; StateHasChanged();}" />
+@if (User is not null) {
+    <Logined User="@User"/>
+}
+else {
+    <LoginComponent/>
+}
+
+@{
+    init();
 }
 
 @code {
-    public User? _user { get; set; }
+
+    [Parameter]
+    public string? Param { get; set; } = string.Empty;
+
+    public User? User { get; set; }
+
+    void init() {
+        Console.WriteLine(Param);
+    }
 
 }

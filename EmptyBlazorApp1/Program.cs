@@ -1,5 +1,6 @@
 using EmptyBlazorApp1.Entities;
 using EmptyBlazorApp1.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Components.Web;
@@ -13,10 +14,16 @@ services.AddServerSideBlazor();
 services.AddScoped<ProtectedSessionStorage>();
 services.AddMudServices();
 
+services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie("Cookie", options => {
+        options.LoginPath = "/login";
+    });
+
 services.AddSingleton<DbService>();
+services.AddHttpContextAccessor();
 services.AddSingleton<AccountService>();
 
-//services.AddHttpContextAccessor();
+
 
 var app = builder.Build();
 
@@ -30,6 +37,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");

@@ -5,8 +5,12 @@
 @using EmptyBlazorApp1.Entities
 @using System.Security.Cryptography;
 @using System.Text;
+@page "/login/{RedirectTo}"
 
 @inject AccountService AccountService
+@inject NavigationManager Navigation
+
+@inject IHttpContextAccessor HttpContextAccessor
 
 
 <MudTabs Elevation="4" Rounded="true" Centered="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
@@ -26,38 +30,56 @@
             <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Filled"></MudTextField>
             <MudButton OnClick="RegisterButtonOnClick" Variant="Variant.Filled" Color="Color.Primary">Register</MudButton>
             @if (errorMessage is not null) {
-                    <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+                <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
             }
         </MudStack>
     </MudTabPanel>
 </MudTabs>
+<MudButton OnClick="a1" Variant="Variant.Filled" Color="Color.Primary">1</MudButton>
+<MudButton OnClick="a2" Variant="Variant.Filled" Color="Color.Primary">2</MudButton>
+<MudButton OnClick="a3" Variant="Variant.Filled" Color="Color.Primary">3</MudButton>
 
 @code {
+
+    void a1() {
+        HttpContextAccessor.HttpContext.Items.Add("a", "A");
+    }
+
+    void a2() {
+        var item = (string)HttpContextAccessor.HttpContext.Items["a"];
+    }
+
+    void a3() {
+        HttpContextAccessor.HttpContext.Items.Remove("a");
+    }
+
     [Parameter]
-    public Action<User>? OnLoginSuccess { get; set; }
+    public string RedirectTo { get; set; } = "/";
+
     public string Login { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 
+        const string cookieKey = "name";
+
     string? errorMessage = null;
-    int num = 0;
 
     private void LoginButtonOnClick() {
         var result = AccountService.TryAuthorize(Login, Password);
-        if (result.Item1 is User user) {
-            OnLoginSuccess?.Invoke(user);
-        } else {
+        if (result.Item1 != null) {
+            Navigation.NavigateTo(RedirectTo);
+        }
+        else {
             Console.WriteLine(result.Item2);
         }
         errorMessage = result.Item2;
-
-        Console.WriteLine(num++);
     }
 
     private void RegisterButtonOnClick() {
         var result = AccountService.TryRegister(Login, Password);
         if (result.Item1 is User user) {
-            OnLoginSuccess?.Invoke(user);
-        } else {
+            Navigation.NavigateTo(RedirectTo);
+        }
+        else {
             Console.WriteLine(result.Item2);
         }
         errorMessage = result.Item2;

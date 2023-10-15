@@ -1,24 +1,41 @@
-﻿using EmptyBlazorApp1.Entities;
+﻿using System.Security.Claims;
+using EmptyBlazorApp1.Entities;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace EmptyBlazorApp1.Services;
 
 public class AccountService {
-    AppDbContext _dbContext;
-    SHA256 sha256 = SHA256.Create();
+    AppDbContext                 _dbContext;
+    SHA256                       sha256 = SHA256.Create();
+    private IHttpContextAccessor _httpContextAccessor;
 
     const string UsernameNotFoundMessage = "Username not found";
-    const string WrongPasswordMessage = "Wrong password";
-    const string UserAlreadyUsedMessage = "User with this username already exists";
+    const string WrongPasswordMessage    = "Wrong password";
+    const string UserAlreadyUsedMessage  = "User with this username already exists";
     const string PasswordTooShortMessage = "Password is too short";
     const string UsernameTooShortMessage = "Username is too short";
 
-    public const int SaltLength = 8;
+    public const int SaltLength        = 8;
+    public const int SessionIdLength   = 64;
     public const int MinPasswordLength = 8;
-    public const int MinUsernameLength = 8;
+    public const int MinUsernameLength = 6;
 
-    public (User?, string) TryAuthorize(string username, string password) {
+    public bool IsAuthorized(IHttpContextAccessor accessor) {
+        return _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
+    }
+
+    void SetClaimsCookie(User user) {
+        var claims = new List<Claim> {
+                                         new(ClaimTypes.Name, user.Username),
+                                         new(ClaimTypes.NameIdentifier, user.Id.ToString())
+                                     };
+        _httpContextAccessor.HttpContext.User =
+            new ClaimsPrincipal(new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme));
+    }
+
+    public (User?, string?) TryAuthorize(string username, string password) {
         if (username.Length < MinUsernameLength)
             return (null, UsernameTooShortMessage);
         if (password.Length < MinPasswordLength)
@@ -27,12 +44,15 @@ public class AccountService {
         User? user = _dbContext.Users.FirstOrDefault(u => u.Username == username);
         if (user is null)
             return (null, UsernameNotFoundMessage);
-        if (ValidatePassword(user, password))
-            return (user, string.Empty);
+        if (ValidatePassword(user, password)) {
+            SetClaimsCookie(user);
+            return (user, null);
+        }
+
         return (null, WrongPasswordMessage);
     }
 
-    public (User?, string) TryRegister(string username, string password) {
+    public (User?, string?) TryRegister(string username, string password) {
         if (username.Length < MinUsernameLength)
             return (null, UsernameTooShortMessage);
         if (password.Length < MinPasswordLength)
@@ -41,24 +61,31 @@ public class AccountService {
         if (GetUser(username) is User)
             return (null, UserAlreadyUsedMessage);
 
-        var salt = GenerateSalt();
+        var salt         = GenerateSalt();
         var passwordHash = GenerateSaltedHash(password, salt);
 
         User user = new(username, passwordHash, salt);
         _dbContext.Users.Add(user);
         _dbContext.SaveChanges();
-        return (user, string.Empty);
+        SetClaimsCookie(user);
+        return (user, null);
     }
 
-    private User? GetUser(string username) 
+    private User? GetUser(string username)
         => _dbContext.Users.FirstOrDefault(u => u.Username == username);
 
-    public AccountService(DbService dbService) {
-        _dbContext = dbService.DbContext;
+    public AccountService(DbService dbService, IHttpContextAccessor httpContextAccessor) {
+        _dbContext           = dbService.DbContext;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     string GenerateSalt() {
         byte[] randomBytes = RandomNumberGenerator.GetBytes(SaltLength);
+        return Convert.ToBase64String(randomBytes);
+    }
+
+    string GenerateRandomString(int bytes) {
+        byte[] randomBytes = RandomNumberGenerator.GetBytes(bytes);
         return Convert.ToBase64String(randomBytes);
     }
 
