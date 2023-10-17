@@ -8,7 +8,7 @@ public class AppDbContext : DbContext {
     public DbSet<Session> Sessions { get; set; } = null!;
 
     public AppDbContext() {
-        Database.EnsureDeleted();
+        //Database.EnsureDeleted();
         Database.EnsureCreated();
     }
 

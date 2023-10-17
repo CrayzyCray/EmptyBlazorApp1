@@ -6,14 +6,14 @@ using EmptyBlazorApp1.Middleware;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.JSInterop;
 
 namespace EmptyBlazorApp1.Services;
 
 public class AccountService {
-    readonly AppDbContext          _dbContext;
-    readonly SHA256                sha256 = SHA256.Create();
-    readonly IHttpContextAccessor  _httpContextAccessor;
-    readonly ProtectedLocalStorage _localStorage;
+    readonly AppDbContext         _dbContext;
+    readonly SHA256               sha256 = SHA256.Create();
+    readonly IHttpContextAccessor _httpContextAccessor;
 
     const string UsernameNotFoundMessage = "Username not found";
     const string WrongPasswordMessage    = "Wrong password";
@@ -27,42 +27,29 @@ public class AccountService {
     public const int    MinUsernameLength = 6;
     public const string SessionIdCode     = "SessionId";
 
-    public AccountService(DbService             dbService,
-                          IHttpContextAccessor  httpContextAccessor,
-                          ProtectedLocalStorage localStorage
+    public AccountService(DbService            dbService,
+                          IHttpContextAccessor httpContextAccessor
     ) {
         _dbContext           = dbService.DbContext;
         _httpContextAccessor = httpContextAccessor;
-        _localStorage        = localStorage;
     }
 
-    public void SetItem() {
-        _httpContextAccessor.HttpContext.Items.Add("a", "b");
+    public bool IsAuthorized() {
+        return _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
     }
 
-    public void ReadItem() {
-        var item = _httpContextAccessor.HttpContext.Items["a"];
+    public string GetCurrentUsername() {
+        return _httpContextAccessor.HttpContext.User.Identity.Name;
     }
 
-    public async Task<bool> IsAuthorized() {
-        if (_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated) {
-            return true;
-        }
-
-        var res = await _localStorage.GetAsync<string>(SessionIdCode);
-        if (!res.Success) {
-            return false;
-        }
-
-        var sessionId = res.Value;
-        var user      = GetUser(sessionId);
+    public bool TryAuthorizeBySession(string sessionId) {
+        var user = GetUser(sessionId);
         if (user is null) {
             return false;
         }
-
         Authorize(user);
         return true;
-    }
+    } 
 
     public (bool, string?) TryAuthorize(string username, string password) {
         if (username.Length < MinUsernameLength)
@@ -82,7 +69,7 @@ public class AccountService {
 
         Authorize(user);
 
-        return (true, null);
+        return (true, session.SessionId);
     }
 
     public (bool, string?) TryRegister(string username, string password) {
@@ -107,7 +94,7 @@ public class AccountService {
 
         Authorize(user);
 
-        return (true, null);
+        return (true, session.SessionId);
     }
 
     User? GetUser(string sessionId) {
@@ -116,9 +103,11 @@ public class AccountService {
     }
 
     void Authorize(User user) {
-        var claimsIdentity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme,
-                                                user.Username,
-                                                null);
+        List<Claim> claims = new List<Claim>
+                             {
+                                 new Claim(ClaimTypes.Name, user.Username)
+                             };
+        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         _httpContextAccessor.HttpContext.User = new ClaimsPrincipal(claimsIdentity);
     }
 

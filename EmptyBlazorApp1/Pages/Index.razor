@@ -4,25 +4,45 @@
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject AccountService AccountService
 @inject ProtectedLocalStorage ProtectedLocalStorage
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IHttpClientFactory ClientFactory
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
 
 <MudText>Index page</MudText>
 <MudNavLink Href="login">Login</MudNavLink>
 <MudNavLink Href="logined">Logined</MudNavLink>
-<MudButton OnClick="AccountService.SetItem">Set</MudButton>
-<MudButton OnClick="AccountService.ReadItem">Read</MudButton>
 
 <MudButton OnClick="SetPls">Set PLS</MudButton>
 <MudButton OnClick="GetPls">Read PLS</MudButton>
 
+<MudButton OnClick="a1">a1</MudButton>
+<MudButton OnClick="a2">a2</MudButton>
+
 @code {
+    
+    protected override async void OnInitialized() {
+        var t = await JS.InvokeAsync<string?>("getCookieValue", "d");
+        Console.WriteLine(t);
+        NavigationManager.NavigateTo("login");
+    }
+
+    void a1() {
+        JS.InvokeAsync<object>("setCookieMy", "d", "E");
+    }
+
+    void a2() {
+        var t = JS.InvokeAsync<string?>("getCookieValue", "d").AsTask();
+        Console.WriteLine(t);
+    }
 
     void SetPls() {
         ProtectedLocalStorage.SetAsync("a", "b");
     }
 
     async void GetPls() {
-        var item = await ProtectedLocalStorage.GetAsync<string>("u");
-        Console.WriteLine(item.Value);
+        var res = await ProtectedLocalStorage.GetAsync<string>("a");
+        Console.WriteLine("item.Value" + res.Value);
     }
 
 }

@@ -4,7 +4,7 @@
 
 @inject AccountService AccountService
 @inject NavigationManager Navigation
-
+@inject IJSRuntime JS
 
 <MudTabs Elevation="4" Rounded="true" Centered="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
     <MudTabPanel Text="Login">
@@ -29,8 +29,6 @@
     </MudTabPanel>
 </MudTabs>
 
-<MudButton OnClick="AccountService.SetItem">Set</MudButton>
-<MudButton OnClick="AccountService.ReadItem">Read</MudButton>
 <MudButton OnClick="n"></MudButton>
 <MudNavLink Href="/">navl/</MudNavLink>
 
@@ -47,25 +45,27 @@
     string? errorMessage = null;
 
     private void LoginButtonOnClick() {
-        var (success, errorString) = AccountService.TryAuthorize(Login, Password);
+        var (success, str) = AccountService.TryAuthorize(Login, Password);
         if (success) {
+            JS.InvokeAsync<object>("setCookieMy", AccountService.SessionIdCode, str);
             Navigation.NavigateTo("/");
         }
         else {
-            Console.WriteLine(errorString);
+            Console.WriteLine(str);
+            errorMessage = str;
         }
-        errorMessage = errorString;
     }
 
     private void RegisterButtonOnClick() {
-        var (success, errorString) = AccountService.TryRegister(Login, Password);
+        var (success, str) = AccountService.TryRegister(Login, Password);
         if (success) {
+            JS.InvokeAsync<object>("setCookieMy", AccountService.SessionIdCode, str);
             Navigation.NavigateTo("/");
         }
         else {
-            Console.WriteLine(errorString);
+            Console.WriteLine(str);
+            errorMessage = str;
         }
-        errorMessage = errorString;
     }
 
 }

@@ -3,7 +3,10 @@
 @inject NavigationManager Navigation
 
 @{
-    red();
+    if (!AccountService.IsAuthorized()) {
+        Navigation.NavigateTo($"login");
+    }
+    currentUsername = AccountService.GetCurrentUsername();
 }
 
 
@@ -11,20 +14,9 @@
 @using EmptyBlazorApp1.Services
 @using Microsoft.AspNetCore.Authorization
 <h3>Logined</h3>
-@if (User is User user) {
-    <h3>@user.Username</h3>
-}
+<h3>@currentUsername</h3>
 
 @code {
-    
-    [Parameter]
-    public User? User { get; set; }
 
-    async Task red() {
-        var isAuthorized = await AccountService.IsAuthorized();
-        if (!isAuthorized) {
-            Navigation.NavigateTo($"/login");
-        }
-    }
-
+    string currentUsername;
 }
