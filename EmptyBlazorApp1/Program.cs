@@ -1,29 +1,17 @@
-using EmptyBlazorApp1.Entities;
+using EmptyBlazorApp1.Middleware;
 using EmptyBlazorApp1.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder  = WebApplication.CreateBuilder(args);
 var services = builder.Services;
+
 services.AddRazorPages();
 services.AddServerSideBlazor();
-services.AddScoped<ProtectedSessionStorage>();
 services.AddMudServices();
-
-services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie("Cookie", options => {
-        options.LoginPath = "/login";
-    });
 
 services.AddSingleton<DbService>();
 services.AddHttpContextAccessor();
-services.AddSingleton<AccountService>();
-
-
+services.AddScoped<AccountService>();
 
 var app = builder.Build();
 
@@ -33,12 +21,9 @@ if (!app.Environment.IsDevelopment()) {
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
-
 app.UseRouting();
-
-
+app.UseMiddleware<AccountMiddleware>();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");

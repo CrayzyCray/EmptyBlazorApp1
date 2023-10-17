@@ -2,14 +2,16 @@
 using EmptyBlazorApp1.Entities;
 using System.Security.Cryptography;
 using System.Text;
+using EmptyBlazorApp1.Middleware;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace EmptyBlazorApp1.Services;
 
 public class AccountService {
-    AppDbContext                 _dbContext;
-    SHA256                       sha256 = SHA256.Create();
-    private IHttpContextAccessor _httpContextAccessor;
+    readonly AppDbContext         _dbContext;
+    readonly SHA256               sha256 = SHA256.Create();
+    readonly IHttpContextAccessor _httpContextAccessor;
 
     const string UsernameNotFoundMessage = "Username not found";
     const string WrongPasswordMessage    = "Wrong password";
@@ -22,59 +24,79 @@ public class AccountService {
     public const int MinPasswordLength = 8;
     public const int MinUsernameLength = 6;
 
-    public bool IsAuthorized(IHttpContextAccessor accessor) {
+    public bool IsAuthorized() {
         return _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
     }
 
-    void SetClaimsCookie(User user) {
-        var claims = new List<Claim> {
-                                         new(ClaimTypes.Name, user.Username),
-                                         new(ClaimTypes.NameIdentifier, user.Id.ToString())
-                                     };
-        _httpContextAccessor.HttpContext.User =
-            new ClaimsPrincipal(new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme));
-    }
-
-    public (User?, string?) TryAuthorize(string username, string password) {
+    public (bool, string?) TryAuthorize(string username, string password) {
         if (username.Length < MinUsernameLength)
-            return (null, UsernameTooShortMessage);
+            return (false, UsernameTooShortMessage);
         if (password.Length < MinPasswordLength)
-            return (null, PasswordTooShortMessage);
+            return (false, PasswordTooShortMessage);
 
         User? user = _dbContext.Users.FirstOrDefault(u => u.Username == username);
         if (user is null)
-            return (null, UsernameNotFoundMessage);
-        if (ValidatePassword(user, password)) {
-            SetClaimsCookie(user);
-            return (user, null);
-        }
+            return (false, UsernameNotFoundMessage);
+        if (!ValidatePassword(user, password))
+            return (false, WrongPasswordMessage);
+        
+        Session session = CreateSession(user);
+        _dbContext.SaveChanges();
+        
+        _httpContextAccessor.HttpContext.Items.Add(AccountMiddleware.SessionIdCode, session.SessionId);
 
-        return (null, WrongPasswordMessage);
+        return (true, null);
     }
 
-    public (User?, string?) TryRegister(string username, string password) {
+    public (bool, string?) TryRegister(string username, string password) {
         if (username.Length < MinUsernameLength)
-            return (null, UsernameTooShortMessage);
+            return (false, UsernameTooShortMessage);
         if (password.Length < MinPasswordLength)
-            return (null, PasswordTooShortMessage);
+            return (false, PasswordTooShortMessage);
 
         if (GetUser(username) is User)
-            return (null, UserAlreadyUsedMessage);
+            return (false, UserAlreadyUsedMessage);
 
         var salt         = GenerateSalt();
         var passwordHash = GenerateSaltedHash(password, salt);
 
-        User user = new(username, passwordHash, salt);
+        User    user    = new(username, passwordHash, salt);
+        Session session = CreateSession(user);
+
+
         _dbContext.Users.Add(user);
+        _dbContext.Sessions.Add(session);
         _dbContext.SaveChanges();
-        SetClaimsCookie(user);
-        return (user, null);
+
+        _httpContextAccessor.HttpContext.Items.Add(AccountMiddleware.SessionIdCode, session.SessionId);
+
+        return (true, null);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="user"></param>
+    /// <returns>New SessionId</returns>
+    Session CreateSession(User user) {
+        var sessionId = GenerateRandomString(SessionIdLength);
+
+        while (_dbContext.Sessions.FirstOrDefault(s => s.SessionId == sessionId) is not null) {
+            sessionId = GenerateRandomString(SessionIdLength);
+        }
+
+        var session = new Session(user, sessionId);
+        _dbContext.Sessions.Add(session);
+        _dbContext.SaveChanges();
+        return session;
     }
 
     private User? GetUser(string username)
         => _dbContext.Users.FirstOrDefault(u => u.Username == username);
 
-    public AccountService(DbService dbService, IHttpContextAccessor httpContextAccessor) {
+    public AccountService(DbService            dbService,
+                          IHttpContextAccessor httpContextAccessor
+    ) {
         _dbContext           = dbService.DbContext;
         _httpContextAccessor = httpContextAccessor;
     }

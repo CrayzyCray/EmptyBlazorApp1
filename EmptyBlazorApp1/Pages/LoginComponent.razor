@@ -5,12 +5,14 @@
 @using EmptyBlazorApp1.Entities
 @using System.Security.Cryptography;
 @using System.Text;
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @page "/login/{RedirectTo}"
 
 @inject AccountService AccountService
 @inject NavigationManager Navigation
 
 @inject IHttpContextAccessor HttpContextAccessor
+@inject ProtectedLocalStorage ProtectedLocalStorage
 
 
 <MudTabs Elevation="4" Rounded="true" Centered="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
@@ -35,54 +37,35 @@
         </MudStack>
     </MudTabPanel>
 </MudTabs>
-<MudButton OnClick="a1" Variant="Variant.Filled" Color="Color.Primary">1</MudButton>
-<MudButton OnClick="a2" Variant="Variant.Filled" Color="Color.Primary">2</MudButton>
-<MudButton OnClick="a3" Variant="Variant.Filled" Color="Color.Primary">3</MudButton>
 
 @code {
-
-    void a1() {
-        HttpContextAccessor.HttpContext.Items.Add("a", "A");
-    }
-
-    void a2() {
-        var item = (string)HttpContextAccessor.HttpContext.Items["a"];
-    }
-
-    void a3() {
-        HttpContextAccessor.HttpContext.Items.Remove("a");
-    }
-
     [Parameter]
     public string RedirectTo { get; set; } = "/";
-
     public string Login { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
-
-        const string cookieKey = "name";
 
     string? errorMessage = null;
 
     private void LoginButtonOnClick() {
-        var result = AccountService.TryAuthorize(Login, Password);
-        if (result.Item1 != null) {
+        var (success, errorString) = AccountService.TryAuthorize(Login, Password);
+        if (success) {
             Navigation.NavigateTo(RedirectTo);
         }
         else {
-            Console.WriteLine(result.Item2);
+            Console.WriteLine(errorString);
         }
-        errorMessage = result.Item2;
+        errorMessage = errorString;
     }
 
     private void RegisterButtonOnClick() {
-        var result = AccountService.TryRegister(Login, Password);
-        if (result.Item1 is User user) {
+        var (success, errorString) = AccountService.TryRegister(Login, Password);
+        if (success) {
             Navigation.NavigateTo(RedirectTo);
         }
         else {
-            Console.WriteLine(result.Item2);
+            Console.WriteLine(errorString);
         }
-        errorMessage = result.Item2;
+        errorMessage = errorString;
     }
 
 }
