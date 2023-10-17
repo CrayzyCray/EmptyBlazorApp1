@@ -5,13 +5,15 @@ using System.Text;
 using EmptyBlazorApp1.Middleware;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.EntityFrameworkCore;
 
 namespace EmptyBlazorApp1.Services;
 
 public class AccountService {
-    readonly AppDbContext         _dbContext;
-    readonly SHA256               sha256 = SHA256.Create();
-    readonly IHttpContextAccessor _httpContextAccessor;
+    readonly AppDbContext          _dbContext;
+    readonly SHA256                sha256 = SHA256.Create();
+    readonly IHttpContextAccessor  _httpContextAccessor;
+    readonly ProtectedLocalStorage _localStorage;
 
     const string UsernameNotFoundMessage = "Username not found";
     const string WrongPasswordMessage    = "Wrong password";
@@ -19,13 +21,47 @@ public class AccountService {
     const string PasswordTooShortMessage = "Password is too short";
     const string UsernameTooShortMessage = "Username is too short";
 
-    public const int SaltLength        = 8;
-    public const int SessionIdLength   = 64;
-    public const int MinPasswordLength = 8;
-    public const int MinUsernameLength = 6;
+    public const int    SaltLength        = 8;
+    public const int    SessionIdLength   = 64;
+    public const int    MinPasswordLength = 8;
+    public const int    MinUsernameLength = 6;
+    public const string SessionIdCode     = "SessionId";
 
-    public bool IsAuthorized() {
-        return _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
+    public AccountService(DbService             dbService,
+                          IHttpContextAccessor  httpContextAccessor,
+                          ProtectedLocalStorage localStorage
+    ) {
+        _dbContext           = dbService.DbContext;
+        _httpContextAccessor = httpContextAccessor;
+        _localStorage        = localStorage;
+    }
+
+    public void SetItem() {
+        _httpContextAccessor.HttpContext.Items.Add("a", "b");
+    }
+
+    public void ReadItem() {
+        var item = _httpContextAccessor.HttpContext.Items["a"];
+    }
+
+    public async Task<bool> IsAuthorized() {
+        if (_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated) {
+            return true;
+        }
+
+        var res = await _localStorage.GetAsync<string>(SessionIdCode);
+        if (!res.Success) {
+            return false;
+        }
+
+        var sessionId = res.Value;
+        var user      = GetUser(sessionId);
+        if (user is null) {
+            return false;
+        }
+
+        Authorize(user);
+        return true;
     }
 
     public (bool, string?) TryAuthorize(string username, string password) {
@@ -34,16 +70,17 @@ public class AccountService {
         if (password.Length < MinPasswordLength)
             return (false, PasswordTooShortMessage);
 
-        User? user = _dbContext.Users.FirstOrDefault(u => u.Username == username);
+        var user = _dbContext.Users.FirstOrDefault(u => u.Username == username);
         if (user is null)
             return (false, UsernameNotFoundMessage);
         if (!ValidatePassword(user, password))
             return (false, WrongPasswordMessage);
-        
-        Session session = CreateSession(user);
+
+        var session = CreateSession(user);
+        _dbContext.Sessions.Add(session);
         _dbContext.SaveChanges();
-        
-        _httpContextAccessor.HttpContext.Items.Add(AccountMiddleware.SessionIdCode, session.SessionId);
+
+        Authorize(user);
 
         return (true, null);
     }
@@ -68,9 +105,21 @@ public class AccountService {
         _dbContext.Sessions.Add(session);
         _dbContext.SaveChanges();
 
-        _httpContextAccessor.HttpContext.Items.Add(AccountMiddleware.SessionIdCode, session.SessionId);
+        Authorize(user);
 
         return (true, null);
+    }
+
+    User? GetUser(string sessionId) {
+        var session = GetSessionIncludeUser(_dbContext, sessionId);
+        return session?.User;
+    }
+
+    void Authorize(User user) {
+        var claimsIdentity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme,
+                                                user.Username,
+                                                null);
+        _httpContextAccessor.HttpContext.User = new ClaimsPrincipal(claimsIdentity);
     }
 
     /// <summary>
@@ -85,20 +134,7 @@ public class AccountService {
             sessionId = GenerateRandomString(SessionIdLength);
         }
 
-        var session = new Session(user, sessionId);
-        _dbContext.Sessions.Add(session);
-        _dbContext.SaveChanges();
-        return session;
-    }
-
-    private User? GetUser(string username)
-        => _dbContext.Users.FirstOrDefault(u => u.Username == username);
-
-    public AccountService(DbService            dbService,
-                          IHttpContextAccessor httpContextAccessor
-    ) {
-        _dbContext           = dbService.DbContext;
-        _httpContextAccessor = httpContextAccessor;
+        return new Session(user, sessionId);
     }
 
     string GenerateSalt() {
@@ -119,4 +155,11 @@ public class AccountService {
         var hash = GenerateSaltedHash(password, user.Salt);
         return hash.SequenceEqual(user.PasswordHash);
     }
+
+
+    static readonly Func<AppDbContext, string, Session?> GetSessionIncludeUser
+        = EF.CompileQuery((AppDbContext context, string sessionId) =>
+                              context.Sessions
+                                     .Include(s => s.User)
+                                     .FirstOrDefault(s => s.SessionId == sessionId));
 }

@@ -1,26 +1,28 @@
 ﻿@page "/"
-@using EmptyBlazorApp1.Entities
+@using MudBlazor
+@using EmptyBlazorApp1.Services
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@inject AccountService AccountService
+@inject ProtectedLocalStorage ProtectedLocalStorage
 
-@if (User is not null) {
-    <Logined User="@User"/>
-}
-else {
-    <LoginComponent/>
-}
+<MudText>Index page</MudText>
+<MudNavLink Href="login">Login</MudNavLink>
+<MudNavLink Href="logined">Logined</MudNavLink>
+<MudButton OnClick="AccountService.SetItem">Set</MudButton>
+<MudButton OnClick="AccountService.ReadItem">Read</MudButton>
 
-@{
-    init();
-}
+<MudButton OnClick="SetPls">Set PLS</MudButton>
+<MudButton OnClick="GetPls">Read PLS</MudButton>
 
 @code {
 
-    [Parameter]
-    public string? Param { get; set; } = string.Empty;
+    void SetPls() {
+        ProtectedLocalStorage.SetAsync("a", "b");
+    }
 
-    public User? User { get; set; }
-
-    void init() {
-        Console.WriteLine(Param);
+    async void GetPls() {
+        var item = await ProtectedLocalStorage.GetAsync<string>("u");
+        Console.WriteLine(item.Value);
     }
 
 }

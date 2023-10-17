@@ -1,5 +1,6 @@
 using EmptyBlazorApp1.Middleware;
 using EmptyBlazorApp1.Services;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using MudBlazor.Services;
 
 var builder  = WebApplication.CreateBuilder(args);
@@ -12,6 +13,7 @@ services.AddMudServices();
 services.AddSingleton<DbService>();
 services.AddHttpContextAccessor();
 services.AddScoped<AccountService>();
+services.AddScoped<ProtectedLocalStorage>();
 
 var app = builder.Build();
 
@@ -22,8 +24,8 @@ if (!app.Environment.IsDevelopment()) {
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+//app.UseMiddleware<AccountMiddleware>();
 app.UseRouting();
-app.UseMiddleware<AccountMiddleware>();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");

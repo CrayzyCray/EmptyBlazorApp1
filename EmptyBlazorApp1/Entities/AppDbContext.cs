@@ -8,7 +8,6 @@ public class AppDbContext : DbContext {
     public DbSet<Session> Sessions { get; set; } = null!;
 
     public AppDbContext() {
-        Console.WriteLine("AppDbContext ctor");
         Database.EnsureDeleted();
         Database.EnsureCreated();
     }

@@ -1,26 +1,30 @@
 ﻿@page "/logined"
 @inject AccountService AccountService
-@inject IHttpContextAccessor HttpContextAccessor
 @inject NavigationManager Navigation
 
 @{
-    var isAuthorized = AccountService.IsAuthorized();
-    if (!isAuthorized) {
-        Navigation.NavigateTo("/login");
-    }
+    red();
 }
 
 
 @using EmptyBlazorApp1.Entities
 @using EmptyBlazorApp1.Services
+@using Microsoft.AspNetCore.Authorization
 <h3>Logined</h3>
 @if (User is User user) {
     <h3>@user.Username</h3>
 }
 
 @code {
-
+    
     [Parameter]
     public User? User { get; set; }
+
+    async Task red() {
+        var isAuthorized = await AccountService.IsAuthorized();
+        if (!isAuthorized) {
+            Navigation.NavigateTo($"/login");
+        }
+    }
 
 }
