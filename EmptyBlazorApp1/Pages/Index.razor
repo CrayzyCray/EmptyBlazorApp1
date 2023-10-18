@@ -1,48 +1,94 @@
 ﻿@page "/"
 @using MudBlazor
 @using EmptyBlazorApp1.Services
-@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using EmptyBlazorApp1.Components
 @inject AccountService AccountService
-@inject ProtectedLocalStorage ProtectedLocalStorage
-@inject IHttpContextAccessor HttpContextAccessor
-@inject IHttpClientFactory ClientFactory
+@inject IDialogService DialogService
 @inject IJSRuntime JS
-@inject NavigationManager NavigationManager
 
-<MudText>Index page</MudText>
-<MudNavLink Href="login">Login</MudNavLink>
-<MudNavLink Href="logined">Logined</MudNavLink>
+<MudAppBar Elevation="1" Bottom="true">
+    <MudSpacer />
+    <MudIconButton Icon="@Icons.Material.Filled.CalendarToday" OnClick="NavigateToCalendar"/>
+    <MudIconButton Icon="@Icons.Material.Filled.Dashboard" OnClick="NavigateToCommunities"/>
+    <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" OnClick="NavigateToLogined"/>
+    <MudSpacer />
+</MudAppBar>
 
-<MudButton OnClick="SetPls">Set PLS</MudButton>
-<MudButton OnClick="GetPls">Read PLS</MudButton>
+@{
+    switch (currentPage) {
+        case Pages.Calendar:
+            <CalendarComponent/>
+            break;
+        case Pages.Communities:
+            <CommunitiesComponent/>
+            break;
+        case Pages.Login:
+            <LoginComponent Callback="@loginComponentCallback"/>
+            break;
+        case Pages.Logined:
+            <LoginedComponent/>
+            break;
+        default:
+            break;
+    }
+}
 
-<MudButton OnClick="a1">a1</MudButton>
-<MudButton OnClick="a2">a2</MudButton>
+    @* <MudText>Index page</MudText>
+    <MudNavLink Href="login">Login</MudNavLink>
+    <MudNavLink Href="logined">Logined</MudNavLink>
+    <MudNavLink Href="mainmenu">MainMenu</MudNavLink>
+
+    <MudButton OnClick="SetPls">Set PLS</MudButton>
+    <MudButton OnClick="GetPls">Read PLS</MudButton>
+
+    <MudButton OnClick="a1">a1</MudButton>
+    <MudButton OnClick="a2">a2</MudButton> *@
+
+
 
 @code {
-    
-    protected override async void OnInitialized() {
-        var t = await JS.InvokeAsync<string?>("getCookieValue", "d");
-        Console.WriteLine(t);
-        NavigationManager.NavigateTo("login");
+    Action? loginComponentCallback = null;
+
+    enum Pages {
+        Calendar,
+        Communities,
+        Login,
+        Logined
     }
 
-    void a1() {
-        JS.InvokeAsync<object>("setCookieMy", "d", "E");
+    void NavigateToCommunities() {
+        Navigate(Pages.Communities);
     }
 
-    void a2() {
-        var t = JS.InvokeAsync<string?>("getCookieValue", "d").AsTask();
-        Console.WriteLine(t);
+    void NavigateToCalendar() {
+        Navigate(Pages.Calendar);
     }
 
-    void SetPls() {
-        ProtectedLocalStorage.SetAsync("a", "b");
+    void NavigateToLogin() {
+        var page = currentPage;
+        loginComponentCallback = () => Navigate(page);
+        Navigate(Pages.Login);
     }
 
-    async void GetPls() {
-        var res = await ProtectedLocalStorage.GetAsync<string>("a");
-        Console.WriteLine("item.Value" + res.Value);
+    void NavigateToLogined() {
+        if (AccountService.IsAuthorized()) {
+            Navigate(Pages.Logined);
+        } else {
+            var parameters = new DialogParameters<Dialog>();
+            parameters.Add("ContentText", "Для просмотра этой страницы требуется регистрация");
+            parameters.Add("ButtonText", "Регистрация");
+            parameters.Add("Callback", () => NavigateToLogin());
+            DialogService.Show<Dialog>("Требуется регистрация", parameters);
+        }
     }
 
+    Pages currentPage = Pages.Calendar;
+
+    void Navigate(Pages page) {
+        if (page == currentPage) {
+            return;
+        }
+        currentPage = page;
+        StateHasChanged();
+    }
 }

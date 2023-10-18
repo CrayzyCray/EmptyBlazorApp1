@@ -1,11 +1,7 @@
-﻿@page "/logined"
-@inject AccountService AccountService
+﻿@inject AccountService AccountService
 @inject NavigationManager Navigation
 
 @{
-    if (!AccountService.IsAuthorized()) {
-        Navigation.NavigateTo($"login");
-    }
     currentUsername = AccountService.GetCurrentUsername();
 }
 

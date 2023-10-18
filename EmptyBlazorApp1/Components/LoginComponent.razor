@@ -1,6 +1,5 @@
 ﻿@using MudBlazor
 @using EmptyBlazorApp1.Services
-@page "/login/{RedirectTo?}"
 
 @inject AccountService AccountService
 @inject NavigationManager Navigation
@@ -29,18 +28,11 @@
     </MudTabPanel>
 </MudTabs>
 
-<MudButton OnClick="n"></MudButton>
-<MudNavLink Href="/">navl/</MudNavLink>
-
 @code {
-
-    void n() {
-        Navigation.NavigateTo("/");
-    }
-    [Parameter]
-    public string RedirectTo { get; set; } = "/";
     public string Login { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+
+    [Parameter] public Action? Callback { get; set; }
 
     string? errorMessage = null;
 
@@ -48,7 +40,7 @@
         var (success, str) = AccountService.TryAuthorize(Login, Password);
         if (success) {
             JS.InvokeAsync<object>("setCookieMy", AccountService.SessionIdCode, str);
-            Navigation.NavigateTo("/");
+            Callback?.Invoke();
         }
         else {
             Console.WriteLine(str);
@@ -60,7 +52,7 @@
         var (success, str) = AccountService.TryRegister(Login, Password);
         if (success) {
             JS.InvokeAsync<object>("setCookieMy", AccountService.SessionIdCode, str);
-            Navigation.NavigateTo("/");
+            Callback?.Invoke();
         }
         else {
             Console.WriteLine(str);

@@ -1,8 +1,5 @@
 ﻿<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
-        @{
-            //Console.WriteLine(routeData.PageType.);
-        }
         <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
         <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
     </Found>
@@ -13,5 +10,3 @@
         </LayoutView>
     </NotFound>
 </Router>
-
-
