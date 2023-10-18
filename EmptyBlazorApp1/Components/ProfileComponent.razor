@@ -1,5 +1,27 @@
-﻿<h3>ProfileComponent</h3>
+﻿@using MudBlazor
+@using EmptyBlazorApp1.Entities
+@using EmptyBlazorApp1.Services
+@inject AccountService AS
+
+<MudPaper Class="pa-6 ma-2">
+    <MudText>ФИО: @_userProfile?.Name</MudText>
+    <MudText>Дата рождения: @_userProfile?.Birthday</MudText>
+    <MudText>ВУЗ: @_userProfile?.University</MudText>
+    <MudText>Курс: @_userProfile?.Course</MudText>
+    <MudText>Группа: @_userProfile?.Group</MudText>
+    <MudText>Телефон: @_userProfile?.PhoneNumber</MudText>
+    <MudText>ВК: @_userProfile?.SocialNetworkLink</MudText>
+    <MudText>Почта: @_userProfile?.Email</MudText>
+    <MudIconButton Icon="@Icons.Material.Filled.Edit"  Color="Color.Primary" />
+</MudPaper>
 
 @code {
+    User? _user;
+    UserProfile? _userProfile;
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        _user = AS.GetUserWithProfile();
+        _userProfile = _user?.UserProfile;
+    }
 
 }

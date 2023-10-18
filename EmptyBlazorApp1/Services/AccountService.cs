@@ -2,11 +2,8 @@
 using EmptyBlazorApp1.Entities;
 using System.Security.Cryptography;
 using System.Text;
-using EmptyBlazorApp1.Middleware;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.JSInterop;
 
 namespace EmptyBlazorApp1.Services;
 
@@ -26,6 +23,8 @@ public class AccountService {
     public const int    MinPasswordLength = 8;
     public const int    MinUsernameLength = 6;
     public const string SessionIdCode     = "SessionId";
+    
+    public string? CurrentUserName => _httpContextAccessor.HttpContext.User.Identity.Name;
 
     public AccountService(DbService            dbService,
                           IHttpContextAccessor httpContextAccessor
@@ -36,6 +35,14 @@ public class AccountService {
 
     public bool IsAuthorized() {
         return _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
+    }
+
+    public User? GetUserWithProfile() {
+        var username = CurrentUserName;
+        if (username is null) {
+            return null;
+        }
+        return GetUserIncludeUserProfile(_dbContext, username);
     }
 
     public string GetCurrentUsername() {
@@ -89,7 +96,6 @@ public class AccountService {
         Session     session     = CreateSession(user);
         UserProfile userProfile = new(user);
 
-
         _dbContext.Users.Add(user);
         _dbContext.Sessions.Add(session);
         _dbContext.UserProfile.Add(userProfile);
@@ -107,7 +113,7 @@ public class AccountService {
 
     void Authorize(User user) {
         List<Claim> claims = new List<Claim> {
-                                                 new Claim(ClaimTypes.Name, user.Username)
+                                                 new(ClaimTypes.Name, user.Username)
                                              };
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         _httpContextAccessor.HttpContext.User = new ClaimsPrincipal(claimsIdentity);
@@ -153,4 +159,10 @@ public class AccountService {
                               context.Sessions
                                      .Include(s => s.User)
                                      .FirstOrDefault(s => s.SessionId == sessionId));
+    
+    static readonly Func<AppDbContext, string, User?> GetUserIncludeUserProfile
+        = EF.CompileQuery((AppDbContext context, string username) =>
+                              context.Users
+                                     .Include(s => s.UserProfile)
+                                     .FirstOrDefault(s => s.Username == username));
 }
