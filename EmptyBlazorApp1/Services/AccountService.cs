@@ -47,9 +47,10 @@ public class AccountService {
         if (user is null) {
             return false;
         }
+
         Authorize(user);
         return true;
-    } 
+    }
 
     public (bool, string?) TryAuthorize(string username, string password) {
         if (username.Length < MinUsernameLength)
@@ -84,12 +85,14 @@ public class AccountService {
         var salt         = GenerateSalt();
         var passwordHash = GenerateSaltedHash(password, salt);
 
-        User    user    = new(username, passwordHash, salt);
-        Session session = CreateSession(user);
+        User        user        = new(username, passwordHash, salt);
+        Session     session     = CreateSession(user);
+        UserProfile userProfile = new(user);
 
 
         _dbContext.Users.Add(user);
         _dbContext.Sessions.Add(session);
+        _dbContext.UserProfile.Add(userProfile);
         _dbContext.SaveChanges();
 
         Authorize(user);
@@ -103,10 +106,9 @@ public class AccountService {
     }
 
     void Authorize(User user) {
-        List<Claim> claims = new List<Claim>
-                             {
-                                 new Claim(ClaimTypes.Name, user.Username)
-                             };
+        List<Claim> claims = new List<Claim> {
+                                                 new Claim(ClaimTypes.Name, user.Username)
+                                             };
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         _httpContextAccessor.HttpContext.User = new ClaimsPrincipal(claimsIdentity);
     }

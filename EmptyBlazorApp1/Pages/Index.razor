@@ -1,59 +1,42 @@
 ﻿@page "/"
-@using MudBlazor
 @using EmptyBlazorApp1.Services
 @using EmptyBlazorApp1.Components
 @inject AccountService AccountService
 @inject IDialogService DialogService
-@inject IJSRuntime JS
 
 <MudAppBar Elevation="1" Bottom="true">
-    <MudSpacer />
-    <MudIconButton Icon="@Icons.Material.Filled.CalendarToday" OnClick="NavigateToCalendar"/>
-    <MudIconButton Icon="@Icons.Material.Filled.Dashboard" OnClick="NavigateToCommunities"/>
-    <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" OnClick="NavigateToLogined"/>
-    <MudSpacer />
+    <MudSpacer/>
+    <MudIconButton Icon="@Icons.Material.Filled.CalendarToday" Color="currentPage == Pages.Calendar ? Color.Primary : Color.Default" OnClick="NavigateToCalendar"/>
+    <MudSpacer/>
+    <MudIconButton Icon="@Icons.Material.Filled.Dashboard" Color="currentPage == Pages.Communities ? Color.Primary : Color.Default" OnClick="NavigateToCommunities"/>
+    <MudSpacer/>
+    <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="currentPage == Pages.Profile ? Color.Primary : Color.Default" OnClick="NavigateToLogined"/>
+    <MudSpacer/>
 </MudAppBar>
 
-@{
-    switch (currentPage) {
-        case Pages.Calendar:
-            <CalendarComponent/>
-            break;
-        case Pages.Communities:
-            <CommunitiesComponent/>
-            break;
-        case Pages.Login:
-            <LoginComponent Callback="@loginComponentCallback"/>
-            break;
-        case Pages.Logined:
-            <LoginedComponent/>
-            break;
-        default:
-            break;
-    }
+@switch (currentPage) {
+    case Pages.Calendar:
+        <CalendarComponent/>
+        break;
+    case Pages.Communities:
+        <CommunitiesComponent/>
+        break;
+    case Pages.Login:
+        <LoginComponent Callback="@_loginComponentCallback"/>
+        break;
+    case Pages.Profile:
+        <ProfileComponent/>
+        break;
 }
 
-    @* <MudText>Index page</MudText>
-    <MudNavLink Href="login">Login</MudNavLink>
-    <MudNavLink Href="logined">Logined</MudNavLink>
-    <MudNavLink Href="mainmenu">MainMenu</MudNavLink>
-
-    <MudButton OnClick="SetPls">Set PLS</MudButton>
-    <MudButton OnClick="GetPls">Read PLS</MudButton>
-
-    <MudButton OnClick="a1">a1</MudButton>
-    <MudButton OnClick="a2">a2</MudButton> *@
-
-
-
 @code {
-    Action? loginComponentCallback = null;
+    Action? _loginComponentCallback;
 
     enum Pages {
         Calendar,
         Communities,
         Login,
-        Logined
+        Profile
     }
 
     void NavigateToCommunities() {
@@ -66,13 +49,13 @@
 
     void NavigateToLogin() {
         var page = currentPage;
-        loginComponentCallback = () => Navigate(page);
+        _loginComponentCallback = () => Navigate(page);
         Navigate(Pages.Login);
     }
 
     void NavigateToLogined() {
         if (AccountService.IsAuthorized()) {
-            Navigate(Pages.Logined);
+            Navigate(Pages.Profile);
         } else {
             var parameters = new DialogParameters<Dialog>();
             parameters.Add("ContentText", "Для просмотра этой страницы требуется регистрация");
