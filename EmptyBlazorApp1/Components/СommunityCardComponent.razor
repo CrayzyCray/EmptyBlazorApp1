@@ -1,0 +1,15 @@
+﻿@using MudBlazor
+
+<MudPaper Class="pa-4 ma-2">
+    <MudStack Spacing="1">
+        <MudText>@Title</MudText>
+        <MudText>Рейтинг: @Rating</MudText>
+        <MudText>Подписчики: @Subscribers</MudText>
+    </MudStack>
+</MudPaper>
+
+@code { 
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Rating { get; set; }
+    [Parameter] public string? Subscribers { get; set; }
+}

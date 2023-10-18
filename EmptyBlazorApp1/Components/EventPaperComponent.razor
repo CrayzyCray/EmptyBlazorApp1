@@ -1,0 +1,15 @@
+﻿@using MudBlazor
+
+<MudPaper Class="pa-4 ma-2">
+    <MudStack Spacing="1">
+        <MudText>@Date</MudText>
+        <MudText>@Title</MudText>
+        <MudText>@Description</MudText>
+    </MudStack>
+</MudPaper>
+
+@code { 
+    [Parameter] public string? Date { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? Description { get; set; }
+}

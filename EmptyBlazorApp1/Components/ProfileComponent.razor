@@ -1,9 +1,10 @@
 ﻿@using MudBlazor
 @using EmptyBlazorApp1.Entities
 @using EmptyBlazorApp1.Services
-@inject AccountService AS
+@inject AccountService AccountService
+@inject IJSRuntime JS
 
-<MudPaper Class="pa-6 ma-2">
+<MudPaper Class="pa-4 ma-2">
     <MudText>ФИО: @_userProfile?.Name</MudText>
     <MudText>Дата рождения: @_userProfile?.Birthday</MudText>
     <MudText>ВУЗ: @_userProfile?.University</MudText>
@@ -15,13 +16,22 @@
     <MudIconButton Icon="@Icons.Material.Filled.Edit"  Color="Color.Primary" />
 </MudPaper>
 
+<MudPaper Class="pa-4 ma-2">
+    <MudButton OnClick="LogoutOnClick" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">Выйти из аккаунта</MudButton>
+</MudPaper>
+
 @code {
     User? _user;
     UserProfile? _userProfile;
+
     protected override void OnInitialized() {
         base.OnInitialized();
-        _user = AS.GetUserWithProfile();
+        _user = AccountService.GetUserWithProfile();
         _userProfile = _user?.UserProfile;
     }
-
+    
+    async Task LogoutOnClick() {
+        await JS.InvokeVoidAsync("deleteCookie", AccountService.SessionIdCode);
+        await JS.InvokeVoidAsync("reloadPage");
+    }
 }

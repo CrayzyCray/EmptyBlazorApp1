@@ -1,4 +1,25 @@
-﻿<h3>CalendarComponent</h3>
+﻿@using MudBlazor
+
+<MudStack Spacing="2">
+    <MudText Typo="Typo.h5" Align="Align.Center">Мероприятия</MudText>
+    <MudDivider></MudDivider>
+    <EventPaperComponent 
+        Date="Понедельник 8 сентября"
+        Title="Ералаш"
+        Description="подготовка к выступлению Начало: 15:30"/>
+    <EventPaperComponent 
+        Date="Вторник 9 сентября "
+        Title="Ералаш"
+        Description="подготовка к выступлению Начало: 15:30"/>
+    <EventPaperComponent 
+        Date="Среда 10 сентября "
+        Title="Ералаш"
+        Description="подготовка к выступлению Начало: 15:30"/>
+    <EventPaperComponent 
+        Date="Четверг 11 сентября "
+        Title="Ералаш"
+        Description="подготовка к выступлению Начало: 15:30"/>
+</MudStack>
 
 @code {
 

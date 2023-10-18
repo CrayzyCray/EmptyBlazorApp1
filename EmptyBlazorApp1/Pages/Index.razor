@@ -4,13 +4,13 @@
 @inject AccountService AccountService
 @inject IDialogService DialogService
 
-<MudAppBar Elevation="1" Bottom="true">
+<MudAppBar Elevation="0" Bottom="true">
     <MudSpacer/>
     <MudIconButton Icon="@Icons.Material.Filled.CalendarToday" Color="currentPage == Pages.Calendar ? Color.Primary : Color.Default" OnClick="NavigateToCalendar"/>
     <MudSpacer/>
     <MudIconButton Icon="@Icons.Material.Filled.Dashboard" Color="currentPage == Pages.Communities ? Color.Primary : Color.Default" OnClick="NavigateToCommunities"/>
     <MudSpacer/>
-    <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="currentPage == Pages.Profile ? Color.Primary : Color.Default" OnClick="NavigateToLogined"/>
+    <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="currentPage == Pages.Profile ? Color.Primary : Color.Default" OnClick="NavigateToProfile"/>
     <MudSpacer/>
 </MudAppBar>
 
@@ -21,11 +21,11 @@
     case Pages.Communities:
         <CommunitiesComponent/>
         break;
-    case Pages.Login:
-        <LoginComponent Callback="@_loginComponentCallback"/>
-        break;
     case Pages.Profile:
         <ProfileComponent/>
+        break;
+    case Pages.Login:
+        <LoginComponent Callback="@_loginComponentCallback"/>
         break;
 }
 
@@ -35,8 +35,8 @@
     enum Pages {
         Calendar,
         Communities,
-        Login,
-        Profile
+        Profile,
+        Login
     }
 
     void NavigateToCommunities() {
@@ -53,8 +53,9 @@
         Navigate(Pages.Login);
     }
 
-    void NavigateToLogined() {
+    void NavigateToProfile() {
         if (AccountService.IsAuthorized()) {
+
             Navigate(Pages.Profile);
         } else {
             var parameters = new DialogParameters<Dialog>();
@@ -65,7 +66,7 @@
         }
     }
 
-    Pages currentPage = Pages.Calendar;
+    Pages currentPage = Pages.Communities;
 
     void Navigate(Pages page) {
         if (page == currentPage) {

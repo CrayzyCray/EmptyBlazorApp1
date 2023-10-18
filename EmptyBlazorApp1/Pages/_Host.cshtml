@@ -6,7 +6,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <meta name="viewport" content="width=device-width, height=device-height initial-scale=1.0, user-scalable=no"/>
     <meta charset="utf-8"/>
     <base href="~/"/>
 
@@ -33,7 +33,15 @@
 <script src="_framework/blazor.server.js"></script>
 <script src="/_framework/aspnetcore-browser-refresh.js"></script>
 <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-<script>    
+<script>
+    function reloadPage(){
+       window.location.reload();
+    }
+    
+    function deleteCookie(name) {
+        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
+    }
+    
     function setCookieMy(name, value) {
           document.cookie = name + "=" + value + "; secure;";
     }
@@ -56,6 +64,7 @@
       // If no match is found, return null
       return null;
     }
+
 </script>
 
 </body>
