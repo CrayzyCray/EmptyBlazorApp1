@@ -1,8 +1,28 @@
 ﻿@page "/"
+
 @using EmptyBlazorApp1.Services
 @using EmptyBlazorApp1.Components
+
 @inject AccountService AccountService
 @inject IDialogService DialogService
+
+<MudStack Class="mb-56" Spacing="0">
+    @switch (currentPage) {
+        case Pages.Calendar:
+                    <CalendarComponent/>
+            break;
+        case Pages.Communities:
+                    <CommunitiesComponent/>
+            break;
+        case Pages.Profile:
+                    <ProfileComponent/>
+            break;
+        case Pages.Login:
+                    <LoginComponent Callback="@_loginComponentCallback"/>
+            break;
+    }
+    <MudElement Class="mb-16"/>
+</MudStack>
 
 <MudAppBar Elevation="0" Bottom="true">
     <MudSpacer/>
@@ -13,21 +33,6 @@
     <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="currentPage == Pages.Profile ? Color.Primary : Color.Default" OnClick="NavigateToProfile"/>
     <MudSpacer/>
 </MudAppBar>
-
-@switch (currentPage) {
-    case Pages.Calendar:
-        <CalendarComponent/>
-        break;
-    case Pages.Communities:
-        <CommunitiesComponent/>
-        break;
-    case Pages.Profile:
-        <ProfileComponent/>
-        break;
-    case Pages.Login:
-        <LoginComponent Callback="@_loginComponentCallback"/>
-        break;
-}
 
 @code {
     Action? _loginComponentCallback;

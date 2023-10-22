@@ -23,8 +23,10 @@ public class AccountService {
     public const int    MinPasswordLength = 8;
     public const int    MinUsernameLength = 6;
     public const string SessionIdCode     = "SessionId";
-    
+
     public string? CurrentUserName => _httpContextAccessor.HttpContext.User.Identity.Name;
+
+    public int SaveChanges() => _dbContext.SaveChanges();
 
     public AccountService(DbService            dbService,
                           IHttpContextAccessor httpContextAccessor
@@ -42,6 +44,7 @@ public class AccountService {
         if (username is null) {
             return null;
         }
+
         return GetUserIncludeUserProfile(_dbContext, username);
     }
 
@@ -159,7 +162,7 @@ public class AccountService {
                               context.Sessions
                                      .Include(s => s.User)
                                      .FirstOrDefault(s => s.SessionId == sessionId));
-    
+
     static readonly Func<AppDbContext, string, User?> GetUserIncludeUserProfile
         = EF.CompileQuery((AppDbContext context, string username) =>
                               context.Users

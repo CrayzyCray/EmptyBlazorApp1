@@ -1,6 +1,7 @@
 ﻿@using MudBlazor
 @using EmptyBlazorApp1.Entities
 @using EmptyBlazorApp1.Services
+
 @inject AccountService AccountService
 @inject IJSRuntime JS
 
@@ -17,7 +18,7 @@
 </MudPaper>
 
 <MudPaper Class="pa-4 ma-2">
-    <MudButton OnClick="LogoutOnClick" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">Выйти из аккаунта</MudButton>
+    <MudButton OnClick="LogoutButtonOnClick" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">Выйти из аккаунта</MudButton>
 </MudPaper>
 
 @code {
@@ -30,7 +31,7 @@
         _userProfile = _user?.UserProfile;
     }
     
-    async Task LogoutOnClick() {
+    async Task LogoutButtonOnClick() {
         await JS.InvokeVoidAsync("deleteCookie", AccountService.SessionIdCode);
         await JS.InvokeVoidAsync("reloadPage");
     }
