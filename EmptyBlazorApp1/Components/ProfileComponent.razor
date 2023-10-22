@@ -5,25 +5,37 @@
 @inject AccountService AccountService
 @inject IJSRuntime JS
 
-<MudPaper Class="pa-4 ma-2">
-    <MudText>ФИО: @_userProfile?.Name</MudText>
-    <MudText>Дата рождения: @_userProfile?.Birthday</MudText>
-    <MudText>ВУЗ: @_userProfile?.University</MudText>
-    <MudText>Курс: @_userProfile?.Course</MudText>
-    <MudText>Группа: @_userProfile?.Group</MudText>
-    <MudText>Телефон: @_userProfile?.PhoneNumber</MudText>
-    <MudText>ВК: @_userProfile?.SocialNetworkLink</MudText>
-    <MudText>Почта: @_userProfile?.Email</MudText>
-    <MudIconButton Icon="@Icons.Material.Filled.Edit"  Color="Color.Primary" />
-</MudPaper>
+@switch (_userDataAction) {
+    case UserDataAction.View:
+        <UserProfileDataViewComponent UserProfile="@_userProfile" EditButtonOnClick="SwitchToEdit"/>
+        break;
+    case UserDataAction.Edit:
+        <UserProfileDataEditComponent UserProfile="@_userProfile" OnClose="() => {AccountService.SaveChanges(); SwitchToView();}"/>
+        break;
+}
 
 <MudPaper Class="pa-4 ma-2">
-    <MudButton OnClick="LogoutButtonOnClick" FullWidth="true" Variant="Variant.Filled" Color="Color.Primary">Выйти из аккаунта</MudButton>
+    <MudButton OnClick="LogoutButtonOnClick" FullWidth="true" Variant="Variant.Outlined" Color="Color.Secondary">Выйти из аккаунта</MudButton>
 </MudPaper>
 
 @code {
     User? _user;
     UserProfile? _userProfile;
+    UserDataAction _userDataAction = UserDataAction.View;
+
+    enum UserDataAction {
+        View,
+        Edit
+    }
+
+    void SwitchToEdit() {
+        _userDataAction = UserDataAction.Edit;
+        StateHasChanged();
+    }
+    void SwitchToView() {
+        _userDataAction = UserDataAction.View;
+        StateHasChanged();
+    }
 
     protected override void OnInitialized() {
         base.OnInitialized();

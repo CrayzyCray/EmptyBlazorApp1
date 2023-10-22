@@ -1,0 +1,106 @@
+﻿@using EmptyBlazorApp1.Entities;
+@using MudBlazor
+
+<MudPaper Class="pa-4 ma-2">
+    @if (UserProfile != null) {
+        <MudStack>
+                <MudTextField @bind-Value="_name" Label="ФИО" Variant="Variant.Outlined" InputType="InputType.Text"></MudTextField>
+            <MudDatePicker Label="Дата рождения" Editable="true" @bind-Date="_birthday" Variant="Variant.Outlined" Placeholder="Выберите дату" />
+            <MudTextField @bind-Value="_university" Label="ВУЗ" Variant="Variant.Outlined"></MudTextField>
+            <MudTextField @bind-Value="_course" Label="Курс" Variant="Variant.Outlined"></MudTextField>
+            <MudTextField @bind-Value="_group" Label="Группа" Variant="Variant.Outlined"></MudTextField>
+            <MudTextField @bind-Value="_phoneNumber" Label="Телефон" Variant="Variant.Outlined" InputType="InputType.Telephone"></MudTextField>
+            <MudTextField @bind-Value="_socialNetworkLink" Label="ВК" Variant="Variant.Outlined"></MudTextField>
+            <MudTextField @bind-Value="_email" Label="Email" Variant="Variant.Outlined" InputType="InputType.Email"></MudTextField>
+            @if (errorMessage != null) {
+                <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+            }
+            <MudButton OnClick="SaveButtonOnClickPrivate" Color="Color.Primary" Variant="Variant.Filled">Сохранить</MudButton>
+                <MudButton OnClick="OnClose" Color="Color.Surface" Variant="Variant.Text">Отмена</MudButton>
+        </MudStack>
+    } else {
+        <MudAlert Severity="Severity.Error">Пользователь не найден</MudAlert>
+    }
+</MudPaper>
+
+@code {
+    [Parameter] public UserProfile? UserProfile { get; set; }
+    [Parameter] public Action? OnClose { get; set; }
+
+    string? _name;
+    string? _university;
+    string? _course;
+    string? _group;
+    string? _phoneNumber;
+    string? _socialNetworkLink;
+    string? _email;
+
+    System.DateTime? _birthday;
+    string? errorMessage = null;
+
+    void SaveButtonOnClickPrivate() {
+        errorMessage = FindError();
+        if (errorMessage is not null) {
+            return;
+        }
+
+        UserProfile!.Name = _name!;
+        UserProfile!.University = _university!;
+        UserProfile!.Course = _course!;
+        UserProfile!.Group = _group!;
+        UserProfile!.PhoneNumber = _phoneNumber!;
+        UserProfile!.SocialNetworkLink = _socialNetworkLink!;
+        UserProfile!.Email = _email!;
+        UserProfile!.Birthday = _birthday;
+
+        OnClose?.Invoke();
+    }
+
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        _name = UserProfile?.Name;
+        _university = UserProfile?.University;
+        _course = UserProfile?.Course;
+        _group = UserProfile?.Group;
+        _phoneNumber = UserProfile?.PhoneNumber;
+        _socialNetworkLink = UserProfile?.SocialNetworkLink;
+        _email = UserProfile?.Email;
+        _birthday = UserProfile?.Birthday;
+    }
+
+    string? FindError() {
+        if (_birthday == null) {
+            return BirthdayMustBeSet;
+        }
+        if (_name == string.Empty) {
+            return NameMustBeSet;
+        }
+        if (_university == string.Empty) {
+            return UniversityMustBeSet;
+        }
+        if (_course == string.Empty) {
+            return CourseMustBeSet;
+        }
+        if (_group == string.Empty) {
+            return GroupMustBeSet;
+        }
+        if (_phoneNumber == string.Empty) {
+            return PhoneNumberMustBeSet;
+        }
+        return null;
+    }
+
+    const string BirthdayMustBeSet = "Дата рождения должна быть установлена";
+    const string NameMustBeSet = "ФИО должно быть установлено";
+    const string UniversityMustBeSet = "ВУЗ должен быть установлен";
+    const string CourseMustBeSet = "Курс должен быть установлен";
+    const string GroupMustBeSet = "Группа должна быть установлена";
+    const string PhoneNumberMustBeSet = "Телефон должен быть установлен";
+    const string SocialNetworkLinkMustBeSet = "Социальная сеть должна быть установлена";
+    const string EmailMustBeSet = "Email должен быть установлен";
+    const string BirthdayMustBeValid = "Дата рождения должна быть валидной";
+    const string NameMustBeValid = "ФИО должно быть валидным";
+    const string UniversityMustBeValid = "ВУЗ должен быть валидным";
+    const string CourseMustBeValid = "Курс должен быть валидным";
+    const string GroupMustBeValid = "Группа должна быть валидной";
+}

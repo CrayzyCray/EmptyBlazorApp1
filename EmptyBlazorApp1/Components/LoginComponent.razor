@@ -9,7 +9,7 @@
     <MudTabPanel Text="Login">
         <MudStack>
             <MudTextField @bind-Value="Login" Label="Login" Variant="Variant.Filled"></MudTextField>
-            <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Filled"></MudTextField>
+            <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Filled" InputType="InputType.Password"></MudTextField>
             <MudButton OnClick="LoginButtonOnClick" Variant="Variant.Filled" Color="Color.Primary">Login</MudButton>
             @if (errorMessage is not null) {
                 <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
@@ -19,7 +19,7 @@
     <MudTabPanel Text="Register">
         <MudStack>
             <MudTextField @bind-Value="Login" Label="Login" Variant="Variant.Filled"></MudTextField>
-            <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Filled"></MudTextField>
+            <MudTextField @bind-Value="Password" Label="Password" Variant="Variant.Filled" InputType="InputType.Password"></MudTextField>
             <MudButton OnClick="RegisterButtonOnClick" Variant="Variant.Filled" Color="Color.Primary">Register</MudButton>
             @if (errorMessage is not null) {
                 <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>

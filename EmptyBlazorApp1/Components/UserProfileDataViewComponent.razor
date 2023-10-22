@@ -1,0 +1,22 @@
+﻿@using EmptyBlazorApp1.Entities;
+@using MudBlazor
+<MudPaper Class="pa-4 ma-2">
+    @if (UserProfile != null) {
+        <MudText>ФИО: @UserProfile.Name</MudText>
+        <MudText>Дата рождения: @UserProfile.Birthday?.ToString("dd.mm.yyyy")</MudText>
+        <MudText>ВУЗ: @UserProfile.University</MudText>
+        <MudText>Курс: @UserProfile.Course</MudText>
+        <MudText>Группа: @UserProfile.Group</MudText>
+        <MudText>Телефон: @UserProfile.PhoneNumber</MudText>
+        <MudText>ВК: @UserProfile.SocialNetworkLink</MudText>
+        <MudText>Почта: @UserProfile.Email</MudText>
+        <MudLink OnClick="EditButtonOnClick">Изменить</MudLink>
+    } else {
+        <MudAlert Severity="Severity.Error">Пользователь не найден</MudAlert>
+    }
+</MudPaper>
+
+@code {
+    [Parameter] public UserProfile? UserProfile { get; set; }
+    [Parameter] public Action? EditButtonOnClick { get; set; }
+}
