@@ -3,35 +3,43 @@
 @using EmptyBlazorApp1.Services
 @using EmptyBlazorApp1.Components
 
-@inject AccountService AccountService
+@inject AuthenticationService AuthenticationService
 @inject IDialogService DialogService
 
 <MudStack Class="mb-56" Spacing="0">
     @switch (currentPage) {
         case Pages.Calendar:
-                    <CalendarComponent/>
+            <CalendarComponent/>
             break;
         case Pages.Communities:
-                    <CommunitiesComponent/>
+            <CommunitiesComponent/>
             break;
         case Pages.Profile:
-                    <ProfileComponent/>
+            <ProfileComponent/>
             break;
         case Pages.Login:
-                    <LoginComponent Callback="@_loginComponentCallback"/>
+            <LoginComponent Callback="@_loginComponentCallback"/>
             break;
     }
     <MudElement Class="mb-16"/>
 </MudStack>
 
 <MudAppBar Elevation="0" Bottom="true">
-    <MudSpacer/>
-    <MudIconButton Icon="@Icons.Material.Filled.CalendarToday" Color="currentPage == Pages.Calendar ? Color.Primary : Color.Default" OnClick="NavigateToCalendar"/>
-    <MudSpacer/>
-    <MudIconButton Icon="@Icons.Material.Filled.Dashboard" Color="currentPage == Pages.Communities ? Color.Primary : Color.Default" OnClick="NavigateToCommunities"/>
-    <MudSpacer/>
-    <MudIconButton Icon="@Icons.Material.Filled.AccountCircle" Color="currentPage == Pages.Profile ? Color.Primary : Color.Default" OnClick="NavigateToProfile"/>
-    <MudSpacer/>
+    <MudIconButton
+        Class="flex-grow-1"
+        Icon="@Icons.Material.Filled.CalendarToday"
+        Color="currentPage == Pages.Calendar ? Color.Primary : Color.Default"
+        OnClick="NavigateToCalendar"/>
+    <MudIconButton 
+        Class="flex-grow-1" 
+        Icon="@Icons.Material.Filled.Dashboard" 
+        Color="currentPage == Pages.Communities ? Color.Primary : Color.Default" 
+        OnClick="NavigateToCommunities"/>
+    <MudIconButton 
+        Class="flex-grow-1" 
+        Icon="@Icons.Material.Filled.AccountCircle" 
+        Color="currentPage == Pages.Profile ? Color.Primary : Color.Default" 
+        OnClick="NavigateToProfile"/>
 </MudAppBar>
 
 @code {
@@ -59,10 +67,10 @@
     }
 
     void NavigateToProfile() {
-        if (AccountService.IsAuthorized()) {
-
+        if (AuthenticationService.IsAuthorized()) {
             Navigate(Pages.Profile);
-        } else {
+        }
+        else {
             var parameters = new DialogParameters<Dialog>();
             parameters.Add("ContentText", "Для просмотра этой страницы требуется регистрация");
             parameters.Add("ButtonText", "Регистрация");
@@ -71,7 +79,7 @@
         }
     }
 
-    Pages currentPage = Pages.Communities;
+    Pages currentPage = Pages.Calendar;
 
     void Navigate(Pages page) {
         if (page == currentPage) {

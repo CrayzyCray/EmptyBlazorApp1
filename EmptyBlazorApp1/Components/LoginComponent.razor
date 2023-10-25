@@ -1,7 +1,7 @@
 ﻿@using MudBlazor
 @using EmptyBlazorApp1.Services
 
-@inject AccountService AccountService
+@inject AuthenticationService AuthenticationService
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 
@@ -37,9 +37,9 @@
     string? errorMessage = null;
 
     private void LoginButtonOnClick() {
-        var (success, str) = AccountService.TryAuthorize(Login, Password);
+        var (success, str) = AuthenticationService.TryAuthorize(Login, Password);
         if (success) {
-            JS.InvokeAsync<object>("setCookieMy", AccountService.SessionIdCode, str);
+            JS.InvokeAsync<object>("setCookieMy", AuthenticationService.SessionIdCode, str);
             Callback?.Invoke();
         }
         else {
@@ -49,9 +49,9 @@
     }
 
     private void RegisterButtonOnClick() {
-        var (success, str) = AccountService.TryRegister(Login, Password);
+        var (success, str) = AuthenticationService.TryRegister(Login, Password);
         if (success) {
-            JS.InvokeAsync<object>("setCookieMy", AccountService.SessionIdCode, str);
+            JS.InvokeAsync<object>("setCookieMy", AuthenticationService.SessionIdCode, str);
             Callback?.Invoke();
         }
         else {

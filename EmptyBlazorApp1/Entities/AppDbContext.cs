@@ -7,6 +7,7 @@ public class AppDbContext : DbContext {
     public DbSet<User>        Users       { get; set; } = null!;
     public DbSet<UserProfile> UserProfile { get; set; } = null!;
     public DbSet<Session>     Sessions    { get; set; } = null!;
+    public DbSet<Community>   Communities { get; set; } = null!;
 
     public AppDbContext() {
         //Database.EnsureDeleted();

@@ -1,9 +1,13 @@
 ﻿@using MudBlazor
 @using EmptyBlazorApp1.Components
+@using EmptyBlazorApp1.Entities
+@using EmptyBlazorApp1.Services
+
+@inject AccountService AccountService
 
 <MudStack Spacing="2">
     <MudText Typo="Typo.h5" Align="Align.Center">Сообщества</MudText>
-    <MudDivider></MudDivider>
+    <MudDivider/>
     <СommunityCardComponent
         Title="Сообщество 1"
         Rating="1000"
@@ -42,5 +46,14 @@
 </MudStack>
 
 @code {
+    List<Community> _communities = new List<Community>();
+
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        var user = AccountService.User;
+        if (user != null) {
+            _communities = AccountService.GetCommunities(user);
+        }
+    }
 
 }

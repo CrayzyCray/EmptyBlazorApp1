@@ -7,15 +7,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EmptyBlazorApp1.Middleware;
 
-public class AccountMiddleware {
+public class AuthenticationMiddleware {
     private RequestDelegate _next;
-    private AccountService  _accountService;
+    private AuthenticationService  _authenticationService;
 
     public const string SessionIdCode = "SessionId";
 
-    public AccountMiddleware(RequestDelegate next, AccountService accountService) {
+    public AuthenticationMiddleware(RequestDelegate next, AuthenticationService authenticationService) {
         _next           = next;
-        _accountService = accountService;
+        _authenticationService = authenticationService;
     }
 
     public async Task InvokeAsync(HttpContext context, DbService dbService) {
@@ -31,7 +31,7 @@ public class AccountMiddleware {
             return;
         }
 
-        var success = _accountService.TryAuthorizeBySession(sessionId);
+        var success = _authenticationService.TryAuthorizeBySession(sessionId);
 
         if (!success) {
             context.Response.Cookies.Delete(SessionIdCode);

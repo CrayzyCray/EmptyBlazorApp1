@@ -14,8 +14,8 @@ services.AddHttpClient();
 
 services.AddSingleton<DbService>();
 services.AddHttpContextAccessor();
-services.AddSingleton<AccountService>();
-services.AddScoped<ProtectedLocalStorage>();
+services.AddSingleton<AuthenticationService>();
+services.AddScoped<AccountService>();
 
 var app = builder.Build();
 
@@ -26,7 +26,7 @@ if (!app.Environment.IsDevelopment()) {
 //app.UseAuthentication()
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseMiddleware<AccountMiddleware>();
+app.UseMiddleware<AuthenticationMiddleware>();
 app.UseRouting();
 
 app.MapBlazorHub();

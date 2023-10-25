@@ -2,15 +2,15 @@
 @using EmptyBlazorApp1.Entities
 @using EmptyBlazorApp1.Services
 
-@inject AccountService AccountService
-@inject IJSRuntime JS
+@inject AuthenticationService AuthenticationService
+@inject IJSRuntime Js
 
 @switch (_userDataAction) {
     case UserDataAction.View:
         <UserProfileDataViewComponent UserProfile="@_userProfile" EditButtonOnClick="SwitchToEdit"/>
         break;
     case UserDataAction.Edit:
-        <UserProfileDataEditComponent UserProfile="@_userProfile" OnClose="() => {AccountService.SaveChanges(); SwitchToView();}"/>
+        <UserProfileDataEditComponent UserProfile="@_userProfile" OnClose="() => {AuthenticationService.SaveChanges(); SwitchToView();}"/>
         break;
 }
 
@@ -32,6 +32,7 @@
         _userDataAction = UserDataAction.Edit;
         StateHasChanged();
     }
+
     void SwitchToView() {
         _userDataAction = UserDataAction.View;
         StateHasChanged();
@@ -39,12 +40,13 @@
 
     protected override void OnInitialized() {
         base.OnInitialized();
-        _user = AccountService.GetUserWithProfile();
+        _user = AuthenticationService.GetUserWithProfile();
         _userProfile = _user?.UserProfile;
     }
-    
+
     async Task LogoutButtonOnClick() {
-        await JS.InvokeVoidAsync("deleteCookie", AccountService.SessionIdCode);
-        await JS.InvokeVoidAsync("reloadPage");
+        await Js.InvokeVoidAsync("deleteCookie", AuthenticationService.SessionIdCode);
+        await Js.InvokeVoidAsync("reloadPage");
     }
+
 }
