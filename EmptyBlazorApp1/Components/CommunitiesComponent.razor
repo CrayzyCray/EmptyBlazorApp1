@@ -8,41 +8,12 @@
 <MudStack Spacing="2">
     <MudText Typo="Typo.h5" Align="Align.Center">Сообщества</MudText>
     <MudDivider/>
-    <СommunityCardComponent
-        Title="Сообщество 1"
-        Rating="1000"
-        Subscribers="89"/>
-
-    <СommunityCardComponent
-        Title="Сообщество 2"
-        Rating="960"
-        Subscribers="64"/>
-
-    <СommunityCardComponent
-        Title="Сообщество 3"
-        Rating="879"
-        Subscribers="58"/>
-
-    <СommunityCardComponent
-        Title="Сообщество 4"
-        Rating="799"
-        Subscribers="23"/>
-    <СommunityCardComponent
-        Title="Сообщество 4"
-        Rating="799"
-        Subscribers="23"/>
-    <СommunityCardComponent
-        Title="Сообщество 4"
-        Rating="799"
-        Subscribers="23"/>
-    <СommunityCardComponent
-        Title="Сообщество 4"
-        Rating="799"
-        Subscribers="23"/>
-    <СommunityCardComponent
-        Title="Сообщество 4"
-        Rating="799"
-        Subscribers="23"/>
+    @foreach (var com in _communities) {
+    <СommunityCardComponent 
+        Title="@com.Title"
+        Rating="@com.Description"
+        Subscribers="0"/>
+    }
 </MudStack>
 
 @code {
