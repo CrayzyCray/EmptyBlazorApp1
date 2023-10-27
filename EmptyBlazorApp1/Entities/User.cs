@@ -8,6 +8,7 @@ public class User {
     public bool            CanCreateCommunity { get; set; }
     public UserProfile?    UserProfile        { get; set; }
     public List<Community> Communities        { get; set; }
+    public List<Community> CreatedCommunities { get; set; }
 
     public User() {
     }

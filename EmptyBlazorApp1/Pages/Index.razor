@@ -30,20 +30,22 @@
         Icon="@Icons.Material.Filled.CalendarToday"
         Color="currentPage == Pages.Calendar ? Color.Primary : Color.Default"
         OnClick="NavigateToCalendar"/>
-    <MudIconButton 
-        Class="flex-grow-1" 
-        Icon="@Icons.Material.Filled.Dashboard" 
-        Color="currentPage == Pages.Communities ? Color.Primary : Color.Default" 
+    <MudIconButton
+        Class="flex-grow-1"
+        Icon="@Icons.Material.Filled.Dashboard"
+        Color="currentPage == Pages.Communities ? Color.Primary : Color.Default"
         OnClick="NavigateToCommunities"/>
-    <MudIconButton 
-        Class="flex-grow-1" 
-        Icon="@Icons.Material.Filled.AccountCircle" 
-        Color="currentPage == Pages.Profile ? Color.Primary : Color.Default" 
+    <MudIconButton
+        Class="flex-grow-1"
+        Icon="@Icons.Material.Filled.AccountCircle"
+        Color="currentPage == Pages.Profile ? Color.Primary : Color.Default"
         OnClick="NavigateToProfile"/>
 </MudAppBar>
 
 @code {
     Action? _loginComponentCallback;
+    [Parameter]
+    public string? pageParam { get; set; } = null;
 
     enum Pages {
         Calendar,
@@ -61,8 +63,6 @@
     }
 
     void NavigateToLogin() {
-        var page = currentPage;
-        _loginComponentCallback = () => Navigate(page);
         Navigate(Pages.Login);
     }
 
@@ -71,10 +71,14 @@
             Navigate(Pages.Profile);
         }
         else {
+            
             var parameters = new DialogParameters<Dialog>();
             parameters.Add("ContentText", "Для просмотра этой страницы требуется регистрация");
             parameters.Add("ButtonText", "Регистрация");
-            parameters.Add("Callback", () => NavigateToLogin());
+            parameters.Add("Callback", () => {
+                                           _loginComponentCallback = () => Navigate(Pages.Profile);
+                                           NavigateToLogin();
+                                       });
             DialogService.Show<Dialog>("Требуется регистрация", parameters);
         }
     }
@@ -88,4 +92,32 @@
         currentPage = page;
         StateHasChanged();
     }
+
+    void TryNavigate(Pages page) {
+        if (currentPage == page) {
+            return;
+        }
+        
+        switch (page) {
+            case Pages.Profile:
+                NavigateToProfile();
+            break;
+            case Pages.Login:
+                NavigateToLogin();
+            break;
+            case Pages.Calendar:
+                NavigateToCalendar();
+            break;
+            case Pages.Communities:
+                NavigateToCommunities();
+            break;
+        }
+    }
+
+    protected override void OnParametersSet() {
+        if (pageParam != null && Enum.TryParse(pageParam, out Pages pg)) {
+            TryNavigate(pg);
+        }
+    }
+
 }
