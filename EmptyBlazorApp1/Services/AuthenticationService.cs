@@ -25,7 +25,7 @@ public class AuthenticationService {
     public const int    MinUsernameLength = 6;
     public const string SessionIdCode     = "SessionId";
 
-    public string? CurrentUserName => _httpContextAccessor.HttpContext.User.Identity.Name;
+    public string? CurrentUserName => _httpContextAccessor.HttpContext?.User?.Identity?.Name;
 
     public int SaveChanges() => _dbService.DbContext.SaveChanges();
 
@@ -47,10 +47,6 @@ public class AuthenticationService {
         }
 
         return _dbService.GetUserIncludeUserProfile(username);
-    }
-
-    public string GetCurrentUsername() {
-        return _httpContextAccessor.HttpContext.User.Identity.Name;
     }
 
     public bool TryAuthorizeBySession(string sessionId) {

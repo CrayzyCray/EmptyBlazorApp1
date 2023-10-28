@@ -29,7 +29,7 @@ namespace EmptyBlazorApp1.Migrations
 
                     b.HasIndex("MembersId");
 
-                    b.ToTable("CommunityUser");
+                    b.ToTable("CommunityUser", (string)null);
                 });
 
             modelBuilder.Entity("EmptyBlazorApp1.Entities.Community", b =>
@@ -53,7 +53,7 @@ namespace EmptyBlazorApp1.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.ToTable("Communities");
+                    b.ToTable("Communities", (string)null);
                 });
 
             modelBuilder.Entity("EmptyBlazorApp1.Entities.CommunityHashTags", b =>
@@ -73,7 +73,7 @@ namespace EmptyBlazorApp1.Migrations
 
                     b.HasIndex("CommunityId");
 
-                    b.ToTable("HashTags");
+                    b.ToTable("HashTags", (string)null);
                 });
 
             modelBuilder.Entity("EmptyBlazorApp1.Entities.Session", b =>
@@ -96,7 +96,7 @@ namespace EmptyBlazorApp1.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Sessions");
+                    b.ToTable("Sessions", (string)null);
                 });
 
             modelBuilder.Entity("EmptyBlazorApp1.Entities.User", b =>
@@ -122,7 +122,7 @@ namespace EmptyBlazorApp1.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("EmptyBlazorApp1.Entities.UserProfile", b =>
@@ -170,7 +170,7 @@ namespace EmptyBlazorApp1.Migrations
                     b.HasIndex("UserId")
                         .IsUnique();
 
-                    b.ToTable("UserProfile");
+                    b.ToTable("UserProfile", (string)null);
                 });
 
             modelBuilder.Entity("CommunityUser", b =>

@@ -1,5 +1,5 @@
 ﻿@using MudBlazor
-@using EmptyBlazorApp1.Components
+@using EmptyBlazorApp1.Components.Misc
 @using EmptyBlazorApp1.Entities
 @using EmptyBlazorApp1.Services
 
@@ -9,7 +9,7 @@
     <MudText Typo="Typo.h5" Align="Align.Center">Сообщества</MudText>
     <MudDivider/>
     @foreach (var com in _communities) {
-    <СommunityCardComponent 
+    <СommunityCard 
         Title="@com.Title"
         Rating="@com.Description"
         Subscribers="0"/>

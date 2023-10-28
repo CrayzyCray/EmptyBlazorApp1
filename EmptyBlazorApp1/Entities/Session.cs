@@ -6,7 +6,10 @@ public class Session {
     public User     User      { get; set; }
     public DateTime CreatedAt { get; set; }
 
-    public Session() { }
+    public Session() {
+        SessionId = null!;
+        User = null!;
+    }
 
     public Session(User user, string sessionId) {
         CreatedAt = DateTime.Now;

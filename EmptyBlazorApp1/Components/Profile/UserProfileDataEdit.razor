@@ -4,7 +4,7 @@
 <MudPaper Class="pa-4 ma-2">
     @if (UserProfile != null) {
         <MudStack>
-                <MudTextField @bind-Value="_name" Label="ФИО" Variant="Variant.Outlined" InputType="InputType.Text"></MudTextField>
+            <MudTextField @bind-Value="_name" Label="ФИО" Variant="Variant.Outlined" InputType="InputType.Text"></MudTextField>
             <MudDatePicker Label="Дата рождения" Editable="true" @bind-Date="_birthday" Variant="Variant.Outlined" Placeholder="Выберите дату" />
             <MudTextField @bind-Value="_university" Label="ВУЗ" Variant="Variant.Outlined"></MudTextField>
             <MudTextField @bind-Value="_course" Label="Курс" Variant="Variant.Outlined"></MudTextField>

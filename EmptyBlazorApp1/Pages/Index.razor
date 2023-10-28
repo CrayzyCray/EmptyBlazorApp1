@@ -1,6 +1,9 @@
 ﻿@page "/"
 
 @using EmptyBlazorApp1.Services
+@using EmptyBlazorApp1.Components.Misc
+@using EmptyBlazorApp1.Components.Calendar
+@using EmptyBlazorApp1.Components.Profile
 @using EmptyBlazorApp1.Components
 
 @inject AuthenticationService AuthenticationService
@@ -9,32 +12,31 @@
 <MudStack Class="mb-56" Spacing="0">
     @switch (currentPage) {
         case Pages.Calendar:
-            <CalendarComponent/>
+            <Calendar/>
             break;
         case Pages.Communities:
-            <CommunitiesComponent/>
+            <Communities/>
             break;
         case Pages.Profile:
-            <ProfileComponent/>
+            <Profile/>
             break;
         case Pages.Login:
-            <LoginComponent Callback="@_loginComponentCallback"/>
+            <Login Callback="@_loginComponentCallback"/>
             break;
     }
     <MudElement Class="mb-16"/>
 </MudStack>
 
 <MudAppBar Elevation="0" Bottom="true">
+    <MudIconButton Class="flex-grow-1"
+                   Icon="@Icons.Material.Filled.Dashboard"
+                   Color="currentPage == Pages.Communities ? Color.Primary : Color.Default"
+                   OnClick="NavigateToCommunities" />
     <MudIconButton
         Class="flex-grow-1"
         Icon="@Icons.Material.Filled.CalendarToday"
         Color="currentPage == Pages.Calendar ? Color.Primary : Color.Default"
         OnClick="NavigateToCalendar"/>
-    <MudIconButton
-        Class="flex-grow-1"
-        Icon="@Icons.Material.Filled.Dashboard"
-        Color="currentPage == Pages.Communities ? Color.Primary : Color.Default"
-        OnClick="NavigateToCommunities"/>
     <MudIconButton
         Class="flex-grow-1"
         Icon="@Icons.Material.Filled.AccountCircle"

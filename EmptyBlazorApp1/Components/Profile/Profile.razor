@@ -7,12 +7,19 @@
 
 @switch (_userDataAction) {
     case UserDataAction.View:
-        <UserProfileDataViewComponent UserProfile="@_userProfile" EditButtonOnClick="SwitchToEdit"/>
+        <UserProfileDataView UserProfile="@_userProfile" EditButtonOnClick="SwitchToEdit"/>
         break;
     case UserDataAction.Edit:
-        <UserProfileDataEditComponent UserProfile="@_userProfile" OnClose="() => {AuthenticationService.SaveChanges(); SwitchToView();}"/>
+        <UserProfileDataEdit UserProfile="@_userProfile" OnClose="() => {AuthenticationService.SaveChanges(); SwitchToView();}"/>
         break;
 }
+
+<MudPaper Class="pa-4 mx-2 mb-2">
+    <MudStack>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Сообщества</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Подписки</MudButton>
+    </MudStack>
+</MudPaper>
 
 <MudPaper Class="pa-4 mx-2">
     <MudButton OnClick="LogoutButtonOnClick" FullWidth="true" Variant="Variant.Outlined" Color="Color.Secondary">Выйти из аккаунта</MudButton>
@@ -22,10 +29,16 @@
     User? _user;
     UserProfile? _userProfile;
     UserDataAction _userDataAction = UserDataAction.View;
+    Pages _currentPage = Pages.Profile;
 
     enum UserDataAction {
         View,
         Edit
+    }
+
+    enum Pages {
+        Profile,
+        Communities,
     }
 
     void SwitchToEdit() {
