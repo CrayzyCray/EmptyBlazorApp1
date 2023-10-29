@@ -1,0 +1,42 @@
+﻿@using MudBlazor
+@using EmptyBlazorApp1.Services
+@using EmptyBlazorApp1.Components.Misc
+@using EmptyBlazorApp1.Entities
+
+<DynamicComponent Type="_currentPage" Parameters="@_componentsParameters.GetValueOrDefault(_currentPage)"/>
+
+@code {
+    Type _currentPage = typeof(ListCommunities);
+    Dictionary<Type, Dictionary<string, object>> _componentsParameters;
+
+    public Created() {
+        _componentsParameters = new() {
+            {
+                typeof(ListCommunities), 
+                new() {
+                    {
+                        "Callback", 
+                        () =>
+                        {
+                            _currentPage = typeof(Create);
+                            StateHasChanged();
+                        } 
+                    }
+                }
+            },
+            {
+                typeof(Create),
+                new() {
+                    {
+                        "Callback",
+                        () =>
+                        {
+                            _currentPage = typeof(ListCommunities);
+                            StateHasChanged();
+                        }
+                    }
+                }
+            }
+        };
+    }
+}

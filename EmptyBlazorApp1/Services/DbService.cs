@@ -13,6 +13,13 @@ public class DbService {
         _context = new();
     }
 
+    public void AddCommunity(Community community) {
+        lock (_lock) {
+            _context.Communities.Add(community);
+            _context.SaveChanges();
+        }
+    }
+
     public List<Community> GetSubscriptionCommunities(User user) {
         lock (_lock)
             LoadCommunities(user);

@@ -1,0 +1,74 @@
+﻿@using MudBlazor
+@using EmptyBlazorApp1.Services
+@using EmptyBlazorApp1.Entities
+
+@inject AuthenticationService AS
+@inject DbService DB
+
+<MudStack>
+    <MudTextField @bind-Value="_community.Title"
+                  Variant="Variant.Outlined"
+                  Label="Название" />
+
+    <MudTextField @bind-Value="_community.Description"
+                  Variant="Variant.Outlined"
+                  Label="Описание" />
+
+    <MudTextField @bind-Value="_community.SocialNetworkLink"
+                  Variant="Variant.Outlined"
+                  Label="Социальная сеть" />
+
+    @if (errorMessage is not null) {
+    <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+    }
+
+    <MudButton 
+        OnClick="SaveButtonOnClick"
+        Variant="Variant.Filled"
+        Color="Color.Success" >Создать</MudButton>
+
+    <MudButton 
+        OnClick="Callback"
+        Variant="Variant.Text"
+        Color="Color.Inherit">Отмена</MudButton>
+</MudStack>
+
+
+@code {
+    [Parameter] public Action? Callback { get; set; }
+    EmptyBlazorApp1.Entities.Community _community = new();
+    User? _user;
+    string? errorMessage = null;
+
+    protected override void OnInitialized() {
+        _user = AS.GetUser();
+        _community.Creator = _user;
+        _community.Members = new() { _user };
+    }
+
+    void SaveButtonOnClick() {
+        if (!Validate()) {
+            return;
+        }
+
+        DB.AddCommunity(_community);
+
+        Callback?.Invoke();
+    }
+
+    bool Validate() {
+        if (_community.Title.Length < 6) {
+            errorMessage = "В название должно быть от 6 букв";
+            return false;
+        }
+        if (_community.Description.Length < 6) {
+            errorMessage = "В описании должно быть от 6 букв";
+            return false;
+        }
+        if (_community.SocialNetworkLink.Length == 0) {
+            errorMessage = "Ссылка на социальную сеть должна быть указана";
+            return false;
+        }
+        return true;
+    }
+}

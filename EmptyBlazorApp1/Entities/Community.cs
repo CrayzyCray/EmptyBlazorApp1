@@ -8,4 +8,5 @@ public class Community {
     public List<CommunityHashTags>? HashTags    { get; set; }
     public User?                    Creator     { get; set; }
     public int                     CreatorId   { get; set; }
+    public string SocialNetworkLink { get; set; } = string.Empty;
 }

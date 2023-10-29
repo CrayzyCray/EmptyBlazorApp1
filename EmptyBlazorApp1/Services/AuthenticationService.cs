@@ -53,6 +53,15 @@ public class AuthenticationService {
         return _dbService.GetUserIncludeUserProfile(username);
     }
 
+    public User? GetUser() {
+        var username = CurrentUserName;
+        if (username is null) {
+            return null;
+        }
+
+        return _dbService.GetUser(username);
+    }
+
     public bool TryAuthorizeBySession(string sessionId) {
         var user = GetUser(sessionId);
         if (user is null) {

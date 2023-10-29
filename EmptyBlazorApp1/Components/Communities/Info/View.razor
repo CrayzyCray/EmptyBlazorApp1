@@ -1,0 +1,17 @@
+﻿@using MudBlazor
+@using EmptyBlazorApp1.Entities
+@using EmptyBlazorApp1.Services
+
+@inject AuthenticationService AC
+@inject DbService DB
+
+<h3>View</h3>
+
+@code {
+    [CascadingParameter] public Community? Community { get; set; }
+    bool _isCreatorMode;
+
+    protected override void OnParametersSet() {
+        _isCreatorMode = Community.Creator.Id == AC.GetUser().Id;
+    }
+}
