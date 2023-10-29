@@ -37,6 +37,10 @@ public class AuthenticationService {
     }
 
     public bool IsAuthorized() {
+        if (_httpContextAccessor.HttpContext is null)
+            return false;
+        if (_httpContextAccessor.HttpContext.User.Identity is null)
+            return false;
         return _httpContextAccessor.HttpContext.User.Identity.IsAuthenticated;
     }
 
@@ -112,7 +116,8 @@ public class AuthenticationService {
                                                  new(ClaimTypes.Name, user.Username)
                                              };
         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-        _httpContextAccessor.HttpContext.User = new ClaimsPrincipal(claimsIdentity);
+        if (_httpContextAccessor.HttpContext is not null)
+            _httpContextAccessor.HttpContext.User = new ClaimsPrincipal(claimsIdentity);
     }
 
     /// <summary>

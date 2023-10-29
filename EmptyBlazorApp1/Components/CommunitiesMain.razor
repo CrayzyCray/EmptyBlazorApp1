@@ -14,11 +14,22 @@
         <MudSelectItem Value="Pages.Подписки" Disabled="!AuthenticationService.IsAuthorized()" />
         <MudSelectItem Value="Pages.Созданные" Disabled="!AuthenticationService.IsAuthorized()" />
     </MudSelect>
-    @foreach (var com in _communities) {
-    <СommunityCard 
-        Title="@com.Title"
-        Rating="@com.Description"
-        Subscribers="0"/>
+    @switch (_page){
+        case Pages.Все:
+        <MudText Typo="Typo.body1">Все сообщества</MudText>
+            @foreach (var com in _communities) {
+                <СommunityCard Title="@com.Title"
+                               Rating="@com.Description"
+                               Subscribers="0" />
+            }
+        break;
+        case Pages.Подписки:
+        <MudText Typo="Typo.body1">Подписки</MudText>
+        break;
+        case Pages.Созданные:
+            <MudButton Variant="Variant.Filled" Color="Color.Primary">Создать сообщество</MudButton>
+            <MudText Typo="Typo.body1">Созданные сообщества</MudText>
+        break;
     }
 </MudStack>
 

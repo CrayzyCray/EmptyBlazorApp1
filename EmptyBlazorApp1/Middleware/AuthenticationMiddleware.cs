@@ -19,7 +19,8 @@ public class AuthenticationMiddleware {
     }
 
     public async Task InvokeAsync(HttpContext context, DbService dbService) {
-        if (context.User.Identity.IsAuthenticated) {
+        if (context.User.Identity is not null && 
+            context.User.Identity.IsAuthenticated) {
             await _next(context);
             return;
         }

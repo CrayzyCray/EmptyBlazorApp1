@@ -29,6 +29,6 @@ public class AccountService {
     
     public List<Community> GetCommunities(User user) {
         _dbService.LoadCommunities(user);
-        return user.Communities;
+        return user.Communities!;
     }
 }

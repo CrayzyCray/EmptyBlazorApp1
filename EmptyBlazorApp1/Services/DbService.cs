@@ -7,41 +7,52 @@ public class DbService {
     public AppDbContext DbContext => _context;
 
     AppDbContext _context;
+    object _lock = new();
 
     public DbService() {
         _context = new();
     }
 
     public Session? GetSessionIncludeUser(string sessionId) {
-        return QuerrySessionIncludeUserFromSessionId(_context, sessionId);
+        lock (_lock)
+            return QuerrySessionIncludeUserFromSessionId(_context, sessionId);
     }
 
     public Session? GetSession(string sessionId) {
-        return QuerrySessionFromSessionId(_context, sessionId);
+        lock (_lock)
+            return QuerrySessionFromSessionId(_context, sessionId);
     }
 
     public User? GetUserIncludeUserProfile(string username) {
-        return QuerryUserIncludeUserProfileFromName(_context, username);
+        lock (_lock)
+            return QuerryUserIncludeUserProfileFromName(_context, username);
     }
 
     public User? GetUser(string username) {
-        return QuerryUserFromName(_context, username);
+        lock (_lock)
+            return QuerryUserFromName(_context, username);
     }
 
     public void AddSessionUserUserProfile(Session session, User user, UserProfile userProfile) {
-        _context.Users.Add(user);
-        _context.Sessions.Add(session);
-        _context.UserProfile.Add(userProfile);
-        _context.SaveChanges();
+        lock (_lock) {
+            _context.Users.Add(user);
+            _context.Sessions.Add(session);
+            _context.UserProfile.Add(userProfile);
+            _context.SaveChanges();
+        }
     }
 
     public void AddSession(Session session) {
-        _context.Sessions.Add(session);
-        _context.SaveChanges();
+        lock (_lock) {
+            _context.Sessions.Add(session);
+            _context.SaveChanges();
+        }
     }
     
     public void LoadCommunities(User user) {
-        _context.Entry(user).Collection(u => u.Communities).Load();
+        lock ( _lock) {
+            _context.Entry(user).Collection(u => u.Communities!).Load();
+        }
     }
 
     static readonly Func<AppDbContext, string, Session?> QuerrySessionIncludeUserFromSessionId
