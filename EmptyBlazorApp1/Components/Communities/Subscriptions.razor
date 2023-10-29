@@ -1,5 +1,21 @@
-﻿<h3>Subscriptions</h3>
+﻿@using EmptyBlazorApp1.Services
+@using EmptyBlazorApp1.Components.Misc
+@using EmptyBlazorApp1.Entities
+
+@inject DbService DbService
+@inject AuthenticationService AS
+
+@if (communities is not null)
+@foreach (var community in communities) {
+    <СommunityCard Community="community" />
+}
 
 @code {
+    List<Community>? communities;
 
+    protected override void OnInitialized() {
+        var user = AS.GetUserWithProfile();
+        if (user is not null)
+            communities = DbService.GetSubscriptionCommunities(user);
+    }
 }

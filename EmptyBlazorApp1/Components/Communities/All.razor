@@ -1,5 +1,17 @@
-﻿<h3>All</h3>
+﻿@using EmptyBlazorApp1.Services
+@using EmptyBlazorApp1.Components.Misc
+@using EmptyBlazorApp1.Entities 
+
+@inject DbService DbService
+
+@foreach (var community in communities) {
+    <СommunityCard Community="community" />
+}
 
 @code {
+    List<Community>? communities;
 
+    protected override void OnInitialized() {
+        communities = DbService.GetCommunities();
+    }
 }

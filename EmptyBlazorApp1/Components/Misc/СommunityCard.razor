@@ -1,15 +1,13 @@
 ﻿@using MudBlazor
+@using EmptyBlazorApp1.Entities
 
 <MudPaper Class="pa-4 mx-2">
     <MudStack Spacing="1">
-        <MudText>@Title</MudText>
-        <MudText>Рейтинг: @Rating</MudText>
-        <MudText>Подписчики: @Subscribers</MudText>
+        <MudText>@Community?.Title</MudText>
+        <MudText>Подписчики: @Community?.Members?.Count</MudText>
     </MudStack>
 </MudPaper>
 
 @code { 
-    [Parameter] public string? Title { get; set; }
-    [Parameter] public string? Rating { get; set; }
-    [Parameter] public string? Subscribers { get; set; }
+    [Parameter] [EditorRequired] public Community? Community { get; set; }
 }

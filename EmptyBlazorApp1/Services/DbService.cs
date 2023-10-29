@@ -13,6 +13,23 @@ public class DbService {
         _context = new();
     }
 
+    public List<Community> GetSubscriptionCommunities(User user) {
+        lock (_lock)
+            LoadCommunities(user);
+        return user.Communities!;
+    }
+
+    public List<Community> GetCreatedCommunities(User user) {
+        lock (_lock)
+            LoadCreatedCommunities(user);
+        return user.CreatedCommunities!;
+    }
+
+    public List<Community> GetCommunities() {
+        lock (_lock)
+            return _context.Communities.ToList();
+    }
+
     public Session? GetSessionIncludeUser(string sessionId) {
         lock (_lock)
             return QuerrySessionIncludeUserFromSessionId(_context, sessionId);
@@ -52,6 +69,12 @@ public class DbService {
     public void LoadCommunities(User user) {
         lock ( _lock) {
             _context.Entry(user).Collection(u => u.Communities!).Load();
+        }
+    }
+
+    public void LoadCreatedCommunities(User user) {
+        lock (_lock) {
+            _context.Entry(user).Collection(u => u.CreatedCommunities!).Load();
         }
     }
 
