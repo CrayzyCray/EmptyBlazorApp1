@@ -8,7 +8,7 @@
 <MudTabs Elevation="4" Rounded="true" Centered="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
     <MudTabPanel Text="Login">
         <MudStack>
-            <MudTextField @bind-Value="_login" Label="Login" Variant="Variant.Filled"></MudTextField>
+            <MudTextField @bind-Value="_login" Label="Login" Variant="Variant.Filled" AutoFocus="true"></MudTextField>
             <MudTextField @bind-Value="_password" Label="Password" Variant="Variant.Filled" InputType="InputType.Password"></MudTextField>
             <MudButton OnClick="LoginButtonOnClick" Variant="Variant.Filled" Color="Color.Primary">Login</MudButton>
             @if (errorMessage is not null) {
@@ -18,7 +18,7 @@
     </MudTabPanel>
     <MudTabPanel Text="Register">
         <MudStack>
-            <MudTextField @bind-Value="_login" Label="Login" Variant="Variant.Filled"></MudTextField>
+            <MudTextField @bind-Value="_login" Label="Login" Variant="Variant.Filled" AutoFocus="true"></MudTextField>
             <MudTextField @bind-Value="_password" Label="Password" Variant="Variant.Filled" InputType="InputType.Password"></MudTextField>
             <MudButton OnClick="RegisterButtonOnClick" Variant="Variant.Filled" Color="Color.Primary">Register</MudButton>
             @if (errorMessage is not null) {

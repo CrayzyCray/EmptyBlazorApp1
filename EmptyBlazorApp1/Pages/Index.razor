@@ -15,7 +15,7 @@
             <Calendar/>
             break;
         case Pages.Communities:
-            <Communities/>
+            <CommunitiesMain/>
             break;
         case Pages.Profile:
             <Profile/>
@@ -85,7 +85,7 @@
         }
     }
 
-    Pages currentPage = Pages.Calendar;
+    Pages currentPage = Pages.Communities;
 
     void Navigate(Pages page) {
         if (page == currentPage) {

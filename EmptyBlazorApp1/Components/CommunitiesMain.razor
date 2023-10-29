@@ -1,0 +1,50 @@
+﻿@using MudBlazor
+@using EmptyBlazorApp1.Components.Misc
+@using EmptyBlazorApp1.Entities
+@using EmptyBlazorApp1.Services
+
+@inject AccountService AccountService
+@inject AuthenticationService AuthenticationService
+
+<MudStack Spacing="2">
+    <MudText Typo="Typo.h5" Align="Align.Center">Сообщества</MudText>
+    <MudDivider/>
+    <MudSelect T="Pages" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter" SelectedValuesChanged="SelectedValuesChanged">
+        <MudSelectItem Value="Pages.Все" />
+        <MudSelectItem Value="Pages.Подписки" Disabled="!AuthenticationService.IsAuthorized()" />
+        <MudSelectItem Value="Pages.Созданные" Disabled="!AuthenticationService.IsAuthorized()" />
+    </MudSelect>
+    @foreach (var com in _communities) {
+    <СommunityCard 
+        Title="@com.Title"
+        Rating="@com.Description"
+        Subscribers="0"/>
+    }
+</MudStack>
+
+@code {
+    List<Community> _communities = new List<Community>();
+
+    enum Pages {
+        Все,
+        Подписки,
+        Созданные
+    }
+
+    Pages _page = Pages.Все;
+
+    void SelectedValuesChanged(IEnumerable<Pages> pages) {
+        _page = pages.First();
+        Console.WriteLine(_page.ToString());
+        //StateHasChanged();
+    }
+
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        var user = AccountService.User;
+        if (user != null) {
+            _communities = AccountService.GetCommunities(user);
+        }
+    }
+
+}

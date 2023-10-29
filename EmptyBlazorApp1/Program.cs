@@ -3,6 +3,9 @@ using EmptyBlazorApp1.Services;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using MudBlazor.Services;
 
+Console.InputEncoding = System.Text.Encoding.UTF8;
+Console.OutputEncoding = System.Text.Encoding.UTF8;
+
 var builder  = WebApplication.CreateBuilder(args);
 var services = builder.Services;
 

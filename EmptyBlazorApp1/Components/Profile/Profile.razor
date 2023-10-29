@@ -5,25 +5,34 @@
 @inject AuthenticationService AuthenticationService
 @inject IJSRuntime Js
 
-@switch (_userDataAction) {
-    case UserDataAction.View:
-        <UserProfileDataView UserProfile="@_userProfile" EditButtonOnClick="SwitchToEdit"/>
+@switch (_currentPage) {
+    case Pages.Profile:
+        @switch (_userDataAction) {
+            case UserDataAction.View:
+                <UserProfileDataView UserProfile="@_userProfile" EditButtonOnClick="SwitchToEdit" />
+                break;
+            case UserDataAction.Edit:
+                <UserProfileDataEdit UserProfile="@_userProfile" OnClose="() => {AuthenticationService.SaveChanges(); SwitchToView();}" />
+                break;
+        }
+
+        <MudPaper Class="pa-4 mx-2 mb-2">
+            <MudStack>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="NavigateToCommunities">Сообщества</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Подписки</MudButton>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-4 mx-2">
+            <MudButton OnClick="LogoutButtonOnClick" FullWidth="true" Variant="Variant.Outlined" Color="Color.Secondary">Выйти из аккаунта</MudButton>
+        </MudPaper>
         break;
-    case UserDataAction.Edit:
-        <UserProfileDataEdit UserProfile="@_userProfile" OnClose="() => {AuthenticationService.SaveChanges(); SwitchToView();}"/>
+    case Pages.Communities:
+        <Communities/>
         break;
 }
 
-<MudPaper Class="pa-4 mx-2 mb-2">
-    <MudStack>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Сообщества</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">Подписки</MudButton>
-    </MudStack>
-</MudPaper>
 
-<MudPaper Class="pa-4 mx-2">
-    <MudButton OnClick="LogoutButtonOnClick" FullWidth="true" Variant="Variant.Outlined" Color="Color.Secondary">Выйти из аккаунта</MudButton>
-</MudPaper>
 
 @code {
     User? _user;
@@ -39,6 +48,11 @@
     enum Pages {
         Profile,
         Communities,
+    }
+
+    void NavigateToCommunities() {
+        _currentPage = Pages.Communities;
+        StateHasChanged();
     }
 
     void SwitchToEdit() {
