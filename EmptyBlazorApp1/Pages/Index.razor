@@ -10,117 +10,64 @@
 @inject AuthenticationService AuthenticationService
 @inject IDialogService DialogService
 
-<MudStack Class="mb-56" Spacing="0">
-    @switch (currentPage) {
-        case Pages.Calendar:
-            <Calendar/>
-            break;
-        case Pages.Communities:
-            <Communities/>
-            break;
-        case Pages.Profile:
-            <Profile/>
-            break;
-        case Pages.Login:
-            <Login Callback="@_loginComponentCallback"/>
-            break;
-    }
-    <MudElement Class="mb-16"/>
-</MudStack>
+<DynamicComponent Type="@_currentComponentType" Parameters="@_componentsParameters.GetValueOrDefault(_currentComponentType)" />
 
 <MudAppBar Elevation="0" Bottom="true">
     <MudIconButton Class="flex-grow-1"
                    Icon="@Icons.Material.Filled.Dashboard"
-                   Color="currentPage == Pages.Communities ? Color.Primary : Color.Default"
+                   Color="_currentComponentType == typeof(Communities) ? Color.Primary : Color.Default"
                    OnClick="NavigateToCommunities" />
-    <MudIconButton
-        Class="flex-grow-1"
-        Icon="@Icons.Material.Filled.CalendarToday"
-        Color="currentPage == Pages.Calendar ? Color.Primary : Color.Default"
-        OnClick="NavigateToCalendar"/>
-    <MudIconButton
-        Class="flex-grow-1"
-        Icon="@Icons.Material.Filled.AccountCircle"
-        Color="currentPage == Pages.Profile ? Color.Primary : Color.Default"
-        OnClick="NavigateToProfile"/>
+    <MudIconButton Class="flex-grow-1"
+                   Icon="@Icons.Material.Filled.CalendarToday"
+                   Color="_currentComponentType == typeof(Calendar) ? Color.Primary : Color.Default"
+                   OnClick="NavigateToCalendar"/>
+    <MudIconButton Class="flex-grow-1"
+                   Icon="@Icons.Material.Filled.AccountCircle"
+                   Color="_currentComponentType == typeof(Profile) ? Color.Primary : Color.Default"
+                   OnClick="NavigateToProfile"/>
 </MudAppBar>
 
 @code {
-    Action? _loginComponentCallback;
-    [Parameter]
-    public string? pageParam { get; set; } = null;
-
-    enum Pages {
-        Calendar,
-        Communities,
-        Profile,
-        Login
-    }
+    private Dictionary<Type, Dictionary<string, object>> _componentsParameters = new();
+    DynamicComponent? dynamicComponent;
+    private Type _currentComponentType = typeof(Communities);
 
     void NavigateToCommunities() {
-        Navigate(Pages.Communities);
+        _currentComponentType = typeof(Communities);
     }
 
     void NavigateToCalendar() {
-        Navigate(Pages.Calendar);
+        _currentComponentType = typeof(Calendar);
     }
 
     void NavigateToLogin() {
-        Navigate(Pages.Login);
+        _currentComponentType = typeof(Login);
     }
 
     void NavigateToProfile() {
         if (AuthenticationService.IsAuthorized()) {
-            Navigate(Pages.Profile);
+            _currentComponentType = typeof(Profile);
         }
         else {
-            
             var parameters = new DialogParameters<Dialog>();
             parameters.Add("ContentText", "Для просмотра этой страницы требуется регистрация");
             parameters.Add("ButtonText", "Регистрация");
             parameters.Add("Callback", () => {
-                                           _loginComponentCallback = () => Navigate(Pages.Profile);
-                                           NavigateToLogin();
-                                       });
+                NavigateToLogin();
+                StateHasChanged();
+            });
             DialogService.Show<Dialog>("Требуется регистрация", parameters);
         }
     }
 
-    Pages currentPage = Pages.Communities;
-
-    void Navigate(Pages page) {
-        if (page == currentPage) {
-            return;
-        }
-        currentPage = page;
-        StateHasChanged();
+    protected override void OnInitialized() {
+        _componentsParameters =new() { 
+            { 
+                typeof(Login), 
+                new() { 
+                    { "Callback", () => { NavigateToProfile(); StateHasChanged(); } } 
+                } 
+            }
+        };
     }
-
-    void TryNavigate(Pages page) {
-        if (currentPage == page) {
-            return;
-        }
-        
-        switch (page) {
-            case Pages.Profile:
-                NavigateToProfile();
-            break;
-            case Pages.Login:
-                NavigateToLogin();
-            break;
-            case Pages.Calendar:
-                NavigateToCalendar();
-            break;
-            case Pages.Communities:
-                NavigateToCommunities();
-            break;
-        }
-    }
-
-    protected override void OnParametersSet() {
-        if (pageParam != null && Enum.TryParse(pageParam, out Pages pg)) {
-            TryNavigate(pg);
-        }
-    }
-
 }
