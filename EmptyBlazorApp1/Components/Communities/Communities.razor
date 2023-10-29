@@ -1,0 +1,22 @@
+﻿@using MudBlazor
+@using EmptyBlazorApp1.Components.Misc
+@using EmptyBlazorApp1.Entities
+@using EmptyBlazorApp1.Services
+
+@inject AuthenticationService AuthenticationService
+
+<MudStack Spacing="2">
+    <MudText Typo="Typo.h5" Align="Align.Center">Сообщества</MudText>
+    <MudDivider/>
+    <MudSelect @bind-Value="@componentType" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+        <MudSelectItem Value="typeof(All)">Все</MudSelectItem>
+        <MudSelectItem Value="typeof(Subscriptions)" Disabled="!AuthenticationService.IsAuthorized()">Подписки</MudSelectItem>
+        <MudSelectItem Value="typeof(Created)" Disabled="!AuthenticationService.IsAuthorized()">Созданные</MudSelectItem>
+    </MudSelect>
+    <DynamicComponent Type="@componentType" />
+</MudStack>
+
+@code {
+    IEnumerable<Type> defaultSelection = new List<Type>() { typeof(All) };
+    private Type componentType = typeof(All);
+}

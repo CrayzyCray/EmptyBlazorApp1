@@ -4,6 +4,7 @@
 @using EmptyBlazorApp1.Components.Misc
 @using EmptyBlazorApp1.Components.Calendar
 @using EmptyBlazorApp1.Components.Profile
+@using EmptyBlazorApp1.Components.Communities
 @using EmptyBlazorApp1.Components
 
 @inject AuthenticationService AuthenticationService
@@ -15,7 +16,7 @@
             <Calendar/>
             break;
         case Pages.Communities:
-            <CommunitiesMain/>
+            <Communities/>
             break;
         case Pages.Profile:
             <Profile/>
