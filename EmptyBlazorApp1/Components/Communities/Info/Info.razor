@@ -6,15 +6,30 @@
 @inject DbService DB
 
 <CascadingValue Value="Community">
-    <DynamicComponent Type="@componentType" />
+    <DynamicComponent Type="@_componentType" Parameters="@_componentsParameters.GetValueOrDefault(_componentType)" />
 </CascadingValue>
 
 @code {
-    private Type componentType = typeof(View);
+    private Type _componentType = typeof(View);
+    private Dictionary<Type, Dictionary<string, object>> _componentsParameters;
     [Parameter] public Community? Community { get; set; }
-    bool _isCreatorMode;
+    [Parameter] public Action? GoBack { get; set; }
 
     protected override void OnParametersSet() {
-        _isCreatorMode = Community.Creator.Id == AC.GetUser().Id;
+        _componentsParameters = new() {
+            {
+                typeof(View),
+                new() {
+                    { "GoBack", GoBack! },
+                    { "ToEdit", () => { _componentType = typeof(Edit); StateHasChanged();} }
+                }
+            },
+            {
+                typeof(Edit),
+                new() {
+                          { "ToView", () => { _componentType = typeof(View); StateHasChanged();} }
+                      }
+            }
+        };
     }
 }

@@ -8,37 +8,52 @@
 <MudStack>
     <MudTextField @bind-Value="_community.Title"
                   Variant="Variant.Outlined"
-                  Label="Название" />
+                  Label="Название"/>
 
     <MudTextField @bind-Value="_community.Description"
                   Variant="Variant.Outlined"
-                  Label="Описание" />
+                  Label="Описание"/>
+
+    <MudSelect T="CommunityHashTag" MultiSelection="true" @bind-SelectedValues="SelectedValues">
+        @foreach (var tag in availableTags) {
+            <MudSelectItem Value="@tag">@tag.Name</MudSelectItem>
+        }
+    </MudSelect>
 
     <MudTextField @bind-Value="_community.SocialNetworkLink"
                   Variant="Variant.Outlined"
-                  Label="Социальная сеть" />
+                  Label="Социальная сеть"/>
 
     @if (errorMessage is not null) {
-    <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+        <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
     }
 
-    <MudButton 
+    <MudButton
         OnClick="SaveButtonOnClick"
         Variant="Variant.Filled"
-        Color="Color.Success" >Создать</MudButton>
+        Color="Color.Success">
+        Создать
+    </MudButton>
 
-    <MudButton 
-        OnClick="Callback"
+    <MudButton
+        OnClick="NavigateToList"
         Variant="Variant.Text"
-        Color="Color.Inherit">Отмена</MudButton>
+        Color="Color.Inherit">
+        Отмена
+    </MudButton>
 </MudStack>
 
 
 @code {
-    [Parameter] public Action? Callback { get; set; }
-    EmptyBlazorApp1.Entities.Community _community = new();
+    public IEnumerable<CommunityHashTag> SelectedValues = new List<CommunityHashTag>();
+
+    [Parameter]
+    public Action? NavigateToList { get; set; }
+
+    Community _community = new();
     User? _user;
     string? errorMessage = null;
+    List<CommunityHashTag> availableTags = new();
 
     protected override void OnInitialized() {
         _user = AS.GetUser();
@@ -51,9 +66,11 @@
             return;
         }
 
+        _community.HashTags = new List<CommunityHashTag>(SelectedValues);
+
         DB.AddCommunity(_community);
 
-        Callback?.Invoke();
+        NavigateToList?.Invoke();
     }
 
     bool Validate() {
@@ -69,6 +86,15 @@
             errorMessage = "Ссылка на социальную сеть должна быть указана";
             return false;
         }
+        if (!SelectedValues.Any()) {
+            errorMessage = "Необходимо указать хэштег";
+            return false;
+        }
         return true;
     }
+    
+    protected override void OnParametersSet() {
+        availableTags = DB.GetAvailableCommunityHashTags();
+    }
+
 }

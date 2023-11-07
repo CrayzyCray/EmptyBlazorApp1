@@ -1,8 +1,91 @@
 ﻿@using MudBlazor
 @using EmptyBlazorApp1.Entities
+@using EmptyBlazorApp1.Services
 
-<h3>Edit</h3>
+@inject DbService Db
+
+<MudStack>
+    <MudTextField @bind-Value="Community.Title"
+                  Variant="Variant.Outlined"
+                  Label="Название"/>
+
+    <MudTextField @bind-Value="Community.Description"
+                  Variant="Variant.Outlined"
+                  Label="Описание"/>
+
+    <MudSelect T="CommunityHashTag" MultiSelection="true" @bind-SelectedValues="_selectedValues">
+        @foreach (var tag in availableTags) {
+            <MudSelectItem Value="@tag">@tag.Name</MudSelectItem>
+        }
+    </MudSelect>
+
+    <MudTextField @bind-Value="Community.SocialNetworkLink"
+                  Variant="Variant.Outlined"
+                  Label="Социальная сеть"/>
+
+    @if (errorMessage is not null) {
+        <MudAlert Severity="Severity.Error">@errorMessage</MudAlert>
+    }
+
+    <MudButton
+        OnClick="SaveButtonOnClick"
+        Variant="Variant.Filled"
+        Color="Color.Success">
+        Сохранить
+    </MudButton>
+
+    <MudButton
+        OnClick="ToView"
+        Variant="Variant.Text"
+        Color="Color.Inherit">
+        Отмена
+    </MudButton>
+</MudStack>
 
 @code {
     [CascadingParameter] public Community? Community { get; set; }
+    [Parameter]
+    public Action? ToView { get; set; }
+    
+    IEnumerable<CommunityHashTag> _selectedValues = new List<CommunityHashTag>();
+    
+    string? errorMessage = null;
+    List<CommunityHashTag> availableTags = new();
+    
+    void SaveButtonOnClick() {
+        if (!Validate()) {
+            return;
+        }
+
+        Community.HashTags = new List<CommunityHashTag>(_selectedValues);
+
+        Db.UpdateCommunity(Community);
+
+        ToView?.Invoke();
+    }
+    
+    bool Validate() {
+        if (Community.Title.Length < 6) {
+            errorMessage = "В название должно быть от 6 букв";
+            return false;
+        }
+        if (Community.Description.Length < 6) {
+            errorMessage = "В описании должно быть от 6 букв";
+            return false;
+        }
+        if (Community.SocialNetworkLink.Length == 0) {
+            errorMessage = "Ссылка на социальную сеть должна быть указана";
+            return false;
+        }
+        if (!_selectedValues.Any()) {
+            errorMessage = "Необходимо указать хэштег";
+            return false;
+        }
+        return true;
+    }
+    
+    protected override void OnParametersSet() {
+        availableTags = Db.GetAvailableCommunityHashTags();
+        _selectedValues = Community?.HashTags ?? new List<CommunityHashTag>();
+    }
 }

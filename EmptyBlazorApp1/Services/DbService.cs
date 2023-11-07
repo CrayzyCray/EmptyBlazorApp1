@@ -13,10 +13,24 @@ public class DbService {
         _context = new();
     }
 
+    public int GetSubscribersCount(Community community) {
+        lock (_lock) {
+            LoadSubscribers(community);
+        }
+        return community.Members!.Count;
+    }
+
     public void AddCommunity(Community community) {
         lock (_lock) {
             _context.Communities.Add(community);
             _context.SaveChanges();
+        }
+    }
+    
+    public List<CommunityHashTag> GetAvailableCommunityHashTags() {
+        lock (_lock) {
+            //_context.HashTags.Load();
+            return _context.HashTags.ToList();
         }
     }
 
@@ -32,10 +46,55 @@ public class DbService {
         return user.CreatedCommunities!;
     }
 
+    public bool IsUserSubscribed(User user, Community community) {
+        lock (_lock) {
+            LoadCommunities(user);
+            return user.Communities!.Any(c => c.Id == community.Id);
+        }
+    }
+
+    public void Unsubscribe(User user, Community community) {
+        lock (_lock) {
+            if (user.Communities is null) {
+                LoadCommunities(user);
+            }
+            user.Communities!.Remove(community);
+            _context.SaveChanges();
+        }
+    }
+
+    public void Subscribe(User user, Community community) {
+        lock (_lock) {
+            if (user.Communities is null) {
+                LoadCommunities(user);
+            }
+            user.Communities!.Add(community);
+            _context.SaveChanges();
+        }
+    }
+
     public List<Community> GetCommunities() {
         lock (_lock)
             return _context.Communities.ToList();
     }
+    
+public List<Community> GetCommunities(List<CommunityHashTag> tags) {
+    lock (_lock) {
+        //var posts = context.Posts.Where(p => tags.All(t => p.Tags.Contains(t)
+        return _context.Communities.Where(c => c.HashTags.Any(t => tags.Contains(t))).ToList();
+    }
+        
+}
+
+public List<Community> GetCommunities(User user, List<CommunityHashTag> tags) {
+    lock (_lock) {
+        if (user.Communities is null) {
+            LoadCommunities(user);
+        }
+        var t = user.Communities!.Where(c => c.HashTags.Any(t => tags.Contains(t)));
+        return t.ToList();
+    }
+}
 
     public Session? GetSessionIncludeUser(string sessionId) {
         lock (_lock)
@@ -79,9 +138,21 @@ public class DbService {
         }
     }
 
+    public void LoadSubscribers(Community community) {
+        lock (_lock) {
+            _context.Entry(community).Collection(c => c.Members!).Load();
+        }
+    }
+
     public void LoadCreatedCommunities(User user) {
         lock (_lock) {
             _context.Entry(user).Collection(u => u.CreatedCommunities!).Load();
+        }
+    }
+
+    public void LoadCreator(Community community) {
+        lock (_lock) {
+            _context.Entry(community).Reference(u => u.Creator).Load();
         }
     }
 
@@ -106,4 +177,23 @@ public class DbService {
         = EF.CompileQuery((AppDbContext context, string sessionId) =>
                               context.Sessions
                                      .FirstOrDefault(s => s.SessionId == sessionId));
+
+    public List<CommunityHashTag> GetTags(Community community) {
+        lock (_lock) {
+            LoadTags(community);
+            return community.HashTags!;
+        }
+    }
+
+    public void LoadTags(Community community) {
+        lock (_lock) {
+            _context.Entry(community).Collection(c => c.HashTags!).Load();
+        }
+    }
+
+    public void UpdateCommunity(Community community) {
+        lock (_lock) {
+            _context.SaveChanges();
+        }
+    }
 }

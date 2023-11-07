@@ -7,7 +7,7 @@ public class AppDbContext : DbContext {
     public DbSet<UserProfile>       UserProfile { get; set; } = null!;
     public DbSet<Session>           Sessions    { get; set; } = null!;
     public DbSet<Community>         Communities { get; set; } = null!;
-    public DbSet<CommunityHashTags> HashTags    { get; set; } = null!;
+    public DbSet<CommunityHashTag> HashTags    { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
         optionsBuilder.UseSqlite("Data Source=app.db");
@@ -32,5 +32,9 @@ public class AppDbContext : DbContext {
 
         mBuilder.Entity<Community>()
                 .HasMany(c => c.HashTags);
+
+        mBuilder.Entity<Community>()
+                .HasMany(c => c.HashTags)
+                .WithMany();
     }
 }

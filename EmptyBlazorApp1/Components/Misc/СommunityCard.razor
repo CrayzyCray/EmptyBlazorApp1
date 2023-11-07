@@ -1,13 +1,37 @@
 ﻿@using MudBlazor
 @using EmptyBlazorApp1.Entities
+@using EmptyBlazorApp1.Services
 
-<MudPaper Class="pa-4">
+@inject DbService DB
+
+<MudPaper Class="pa-4" @onclick="OnClick">
     <MudStack Spacing="1">
         <MudText>@Community?.Title</MudText>
-        <MudText>Подписчики: @Community?.Members?.Count</MudText>
+        <MudText>Подписчики: @_subscribersCount</MudText>
     </MudStack>
 </MudPaper>
 
-@code { 
+@code {
     [Parameter] [EditorRequired] public Community? Community { get; set; }
+    [CascadingParameter] Action<Community>? OpenCommunityMenu { get; set; }
+
+    int _subscribersCount = 0;
+
+    void OnClick() {
+        if (Community is null) {
+            return;
+        }
+        OpenCommunityMenu?.Invoke(Community);
+    }
+
+    void LoadData() {
+        if (Community is null) {
+            return;
+        }
+        _subscribersCount = DB.GetSubscribersCount(Community);
+    }
+
+    protected override void OnParametersSet() {
+        LoadData();
+    }
 }

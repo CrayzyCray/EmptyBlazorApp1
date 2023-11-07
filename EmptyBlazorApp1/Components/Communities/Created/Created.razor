@@ -8,35 +8,43 @@
 @code {
     Type _currentPage = typeof(ListCommunities);
     Dictionary<Type, Dictionary<string, object>> _componentsParameters;
+    [Parameter] public Action? SHC { get; set; }
 
-    public Created() {
+    protected override void OnParametersSet() {
         _componentsParameters = new() {
-            {
-                typeof(ListCommunities), 
-                new() {
-                    {
-                        "Callback", 
-                        () =>
-                        {
-                            _currentPage = typeof(Create);
-                            StateHasChanged();
-                        } 
-                    }
-                }
-            },
-            {
-                typeof(Create),
-                new() {
-                    {
-                        "Callback",
-                        () =>
-                        {
-                            _currentPage = typeof(ListCommunities);
-                            StateHasChanged();
-                        }
-                    }
-                }
-            }
-        };
+                                          {
+                                              typeof(ListCommunities), 
+                                              new() {
+                                                        {
+                                                            "NavigateToCreate", 
+                                                            () =>
+                                                            {
+                                                                _currentPage = typeof(Create);
+                                                                SHC?.Invoke();
+                                                                StateHasChanged();
+                                                            } 
+                                                        }
+                                                    }
+                                          },
+                                          {
+                                              typeof(Create),
+                                              new() {
+                                                        {
+                                                            "NavigateToList",
+                                                            () =>
+                                                            {
+                                                                _currentPage = typeof(ListCommunities);
+                                                                SHC?.Invoke();
+                                                                StateHasChanged();
+                                                            }
+                                                        }
+                                                    }
+                                          }
+                                      };
     }
+
+    public override string ToString() {
+        return "Созданные";
+    }
+
 }

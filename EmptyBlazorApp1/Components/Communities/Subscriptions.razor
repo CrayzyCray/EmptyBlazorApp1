@@ -2,7 +2,7 @@
 @using EmptyBlazorApp1.Components.Misc
 @using EmptyBlazorApp1.Entities
 
-@inject DbService DbService
+@inject DbService Db
 @inject AuthenticationService AS
 
 @if (communities is not null)
@@ -11,11 +11,40 @@
 }
 
 @code {
+    [CascadingParameter]
+    public List<CommunityHashTag>? SelectedHashTags { get; set; }
     List<Community>? communities;
-
-    protected override void OnInitialized() {
+    
+    protected override void OnParametersSet() {
         var user = AS.GetUserWithProfile();
-        if (user is not null)
-            communities = DbService.GetSubscriptionCommunities(user);
+        if (user is null) {
+            return;
+        }
+        communities = Db.GetSubscriptionCommunities(user);
+        if (SelectedHashTags.Count > 0) {
+            var t = communities;
+            communities = new();
+            foreach (var c in t) {
+                Db.LoadTags(c);
+                if (c.HashTags is null) {
+                    continue;
+                }
+                bool suitable = true;
+                foreach (var selectedHashTag in SelectedHashTags) {
+                    if (!c.HashTags.Contains(selectedHashTag)) {
+                        suitable = false;
+                        break;
+                    }
+                }
+                if (suitable) {
+                    communities.Add(c);
+                }
+            }
+        }
     }
+
+    public override string ToString() {
+        return "Подписки";
+    }
+
 }

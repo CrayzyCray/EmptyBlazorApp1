@@ -1,22 +1,78 @@
 ﻿@using MudBlazor
-@using EmptyBlazorApp1.Components.Misc
-@using EmptyBlazorApp1.Components.Communities
 @using EmptyBlazorApp1.Entities
 @using EmptyBlazorApp1.Services
 
 @inject AuthenticationService AuthenticationService
+@inject DbService Db
 
-<MudStack Spacing="2" Class="pa-2">
-    <MudText Typo="Typo.h5" Align="Align.Center">Сообщества</MudText>
-    <MudDivider/>
-    <MudSelect @bind-Value="@componentType" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
-        <MudSelectItem Value="typeof(All)">Все</MudSelectItem>
-        <MudSelectItem Value="typeof(Subscriptions)" Disabled="!AuthenticationService.IsAuthorized()">Подписки</MudSelectItem>
-        <MudSelectItem Value="typeof(EmptyBlazorApp1.Components.Communities.Created.Created)" Disabled="!AuthenticationService.IsAuthorized()">Созданные</MudSelectItem>
-    </MudSelect>
-    <DynamicComponent Type="@componentType" />
-</MudStack>
+<CascadingValue TValue="Action<Community>" Value="OpenCommunityMenu">
+    <CascadingValue Value="_selectedTags">
+        <MudStack Spacing="2" Class="pa-2">
+            <MudText Typo="Typo.h5" Align="Align.Center">Сообщества</MudText>
+            <MudDivider/>
+            @if (!SelectBoxIsHidden()) {
+                <MudSelect T="Type" @bind-Value="@_componentType" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
+                    <MudSelectItem Value="typeof(All)">Все сообщества</MudSelectItem>
+                    <MudSelectItem Value="typeof(Subscriptions)" Disabled="!AuthenticationService.IsAuthorized()">Подписки</MudSelectItem>
+                    <MudSelectItem Value="typeof(Created.Created)" Disabled="!AuthenticationService.IsAuthorized()">Созданные</MudSelectItem>
+                </MudSelect>
+
+                <MudSelect T="CommunityHashTag" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter" MultiSelection SelectedValuesChanged="TagSelectedChanges">
+                    @foreach (var tag in availableTags) {
+                        <MudSelectItem Value="@tag">@tag.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+            <DynamicComponent Type="@_componentType" Parameters="@_componentsParameters.GetValueOrDefault(_componentType)"/>
+        </MudStack>
+    </CascadingValue>
+</CascadingValue>
 
 @code {
-    private Type componentType = typeof(All);
+    private Type _componentType = typeof(All);
+    private Dictionary<Type, Dictionary<string, object>> _componentsParameters = new();
+
+    List<CommunityHashTag> _selectedTags = new List<CommunityHashTag>();
+    List<CommunityHashTag> availableTags = new();
+
+    protected override void OnParametersSet() {
+        availableTags = Db.GetAvailableCommunityHashTags();
+    }
+
+    void OpenCommunityMenu(Community community) {
+        var currentComponent = _componentType;
+        _componentsParameters = new() {
+            {
+                typeof(Info.Info),
+                new() {
+                    { "Community", community }, {
+                        "GoBack", () => {
+                                      _componentType = currentComponent;
+                                      StateHasChanged();
+                                  }
+                    }
+                }
+            }, {
+                typeof(Created.Created),
+                new() {
+                    { "SHC", () => { StateHasChanged(); } }
+                }
+            }
+        };
+
+        _componentType = typeof(Info.Info);
+        StateHasChanged();
+    }
+
+    bool SelectBoxIsHidden() {
+        if (_componentType == typeof(Info.Info) || _componentType == typeof(Created.Create)) {
+            return true;
+        }
+        return false;
+    }
+
+    void TagSelectedChanges(IEnumerable<CommunityHashTag> selected) {
+        _selectedTags = new(selected);
+    }
+
 }

@@ -32,31 +32,29 @@
     string _login = string.Empty;
     string _password = string.Empty;
 
-    [Parameter] public Action? Callback { get; set; }
+    [CascadingParameter]
+    public AppNavigationManager NavManager { get; set; }
 
-    string? errorMessage = null;
+    string? errorMessage;
 
     private void LoginButtonOnClick() {
         var (success, str) = AuthenticationService.TryAuthorize(_login, _password);
         if (success) {
             JS.InvokeAsync<object>("setCookieMy", AuthenticationService.SessionIdCode, str);
-            Callback?.Invoke();
+            NavManager.ClearHistory();
+            NavManager.NavigateTo(typeof(Profile.Profile));
         }
-        else {
-            Console.WriteLine(str);
-            errorMessage = str;
-        }
+        errorMessage = str;
     }
 
     private void RegisterButtonOnClick() {
         var (success, str) = AuthenticationService.TryRegister(_login, _password);
         if (success) {
             JS.InvokeAsync<object>("setCookieMy", AuthenticationService.SessionIdCode, str);
-            Callback?.Invoke();
+            NavManager.ClearHistory();
+            NavManager.NavigateTo(typeof(Profile.Profile));
         }
-        else {
-            errorMessage = str;
-        }
+        errorMessage = str;
     }
 
 }

@@ -10,63 +10,60 @@
 @inject AuthenticationService AuthenticationService
 @inject IDialogService DialogService
 
-<DynamicComponent Type="@_currentComponentType" Parameters="@_componentsParameters.GetValueOrDefault(_currentComponentType)" />
+<CascadingValue Value="_navManager">
+    <DynamicComponent Type="@_currentPageType" Parameters="_currentParameters"/>
+</CascadingValue>
 
 <MudAppBar Elevation="0" Bottom="true">
     <MudIconButton Class="flex-grow-1"
                    Icon="@Icons.Material.Filled.Dashboard"
-                   Color="_currentComponentType == typeof(Communities) ? Color.Primary : Color.Default"
-                   OnClick="NavigateToCommunities" />
+                   Color="_currentPageType == typeof(Communities) ? Color.Primary : Color.Default"
+                   OnClick="NavigateToCommunities"/>
     <MudIconButton Class="flex-grow-1"
                    Icon="@Icons.Material.Filled.CalendarToday"
-                   Color="_currentComponentType == typeof(Calendar) ? Color.Primary : Color.Default"
+                   Color="_currentPageType == typeof(Calendar) ? Color.Primary : Color.Default"
                    OnClick="NavigateToCalendar"/>
     <MudIconButton Class="flex-grow-1"
                    Icon="@Icons.Material.Filled.AccountCircle"
-                   Color="_currentComponentType == typeof(Profile) ? Color.Primary : Color.Default"
+                   Color="_currentPageType == typeof(Profile) ? Color.Primary : Color.Default"
                    OnClick="NavigateToProfile"/>
 </MudAppBar>
 
 @code {
-    private Dictionary<Type, Dictionary<string, object>> _componentsParameters = new();
-    private Type _currentComponentType = typeof(Communities);
+    private IDictionary<string, object>? _currentParameters;
+    private Type _currentPageType = typeof(Communities);
+    private AppNavigationManager _navManager;
 
     void NavigateToCommunities() {
-        _currentComponentType = typeof(Communities);
+        _navManager.ClearHistory();
+        _navManager.NavigateTo(typeof(Communities));
     }
 
     void NavigateToCalendar() {
-        _currentComponentType = typeof(Calendar);
-    }
-
-    void NavigateToLogin() {
-        _currentComponentType = typeof(Login);
+        _navManager.ClearHistory();
+        _navManager.NavigateTo(typeof(Calendar));
     }
 
     void NavigateToProfile() {
         if (AuthenticationService.IsAuthorized()) {
-            _currentComponentType = typeof(Profile);
+            _navManager.ClearHistory();
+            _navManager.NavigateTo(typeof(Profile));
         }
         else {
             var parameters = new DialogParameters<Dialog>();
             parameters.Add("ContentText", "Для просмотра этой страницы требуется регистрация");
             parameters.Add("ButtonText", "Регистрация");
-            parameters.Add("Callback", () => {
-                NavigateToLogin();
-                StateHasChanged();
-            });
+            parameters.Add("Callback", () => _navManager.NavigateTo(typeof(Login)));
             DialogService.Show<Dialog>("Требуется регистрация", parameters);
         }
     }
 
     protected override void OnInitialized() {
-        _componentsParameters =new() { 
-            { 
-                typeof(Login), 
-                new() { 
-                    { "Callback", () => { NavigateToProfile(); StateHasChanged(); } } 
-                } 
-            }
-        };
+        _navManager = new(_currentPageType, (page, parameters) => {
+            _currentPageType = page;
+            _currentParameters = parameters;
+            StateHasChanged();
+        });
     }
+
 }

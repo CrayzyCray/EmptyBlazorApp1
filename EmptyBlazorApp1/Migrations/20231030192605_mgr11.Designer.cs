@@ -3,6 +3,7 @@ using System;
 using EmptyBlazorApp1.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,27 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EmptyBlazorApp1.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231030192605_mgr11")]
+    partial class mgr11
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.13");
-
-            modelBuilder.Entity("CommunityCommunityHashTag", b =>
-                {
-                    b.Property<int>("CommunityId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("HashTagsId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("CommunityId", "HashTagsId");
-
-                    b.HasIndex("HashTagsId");
-
-                    b.ToTable("CommunityCommunityHashTag");
-                });
 
             modelBuilder.Entity("CommunityUser", b =>
                 {
@@ -75,17 +63,22 @@ namespace EmptyBlazorApp1.Migrations
                     b.ToTable("Communities");
                 });
 
-            modelBuilder.Entity("EmptyBlazorApp1.Entities.CommunityHashTag", b =>
+            modelBuilder.Entity("EmptyBlazorApp1.Entities.CommunityHashTags", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
+                    b.Property<int?>("CommunityId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CommunityId");
 
                     b.ToTable("HashTags");
                 });
@@ -187,21 +180,6 @@ namespace EmptyBlazorApp1.Migrations
                     b.ToTable("UserProfile");
                 });
 
-            modelBuilder.Entity("CommunityCommunityHashTag", b =>
-                {
-                    b.HasOne("EmptyBlazorApp1.Entities.Community", null)
-                        .WithMany()
-                        .HasForeignKey("CommunityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EmptyBlazorApp1.Entities.CommunityHashTag", null)
-                        .WithMany()
-                        .HasForeignKey("HashTagsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("CommunityUser", b =>
                 {
                     b.HasOne("EmptyBlazorApp1.Entities.Community", null)
@@ -228,6 +206,13 @@ namespace EmptyBlazorApp1.Migrations
                     b.Navigation("Creator");
                 });
 
+            modelBuilder.Entity("EmptyBlazorApp1.Entities.CommunityHashTags", b =>
+                {
+                    b.HasOne("EmptyBlazorApp1.Entities.Community", null)
+                        .WithMany("HashTags")
+                        .HasForeignKey("CommunityId");
+                });
+
             modelBuilder.Entity("EmptyBlazorApp1.Entities.Session", b =>
                 {
                     b.HasOne("EmptyBlazorApp1.Entities.User", "User")
@@ -248,6 +233,11 @@ namespace EmptyBlazorApp1.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("EmptyBlazorApp1.Entities.Community", b =>
+                {
+                    b.Navigation("HashTags");
                 });
 
             modelBuilder.Entity("EmptyBlazorApp1.Entities.User", b =>

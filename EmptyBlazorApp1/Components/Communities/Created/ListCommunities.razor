@@ -3,11 +3,11 @@
 @using EmptyBlazorApp1.Components.Misc
 @using EmptyBlazorApp1.Entities
 
-@inject DbService DbService
+@inject DbService Db
 @inject AuthenticationService AS
 
 <MudButton 
-    OnClick="Callback"
+    OnClick="NavigateToCreate"
     FullWidth="true" 
     Variant="Variant.Outlined" 
     Color="Color.Success" >Создать сообщество</MudButton>
@@ -18,12 +18,36 @@
     }
 
 @code {
-    [Parameter] public Action? Callback { get; set; }
+    [CascadingParameter]
+    public List<CommunityHashTag>? SelectedHashTags { get; set; }
+    [Parameter] public Action? NavigateToCreate { get; set; }
     List<Community>? communities;
 
-    protected override void OnInitialized() {
+    protected override void OnParametersSet() {
+        
         var user = AS.GetUserWithProfile();
-        if (user is not null)
-            communities = DbService.GetCreatedCommunities(user);
+        if (user is null)
+            return;
+        communities = Db.GetCreatedCommunities(user);
+        if (SelectedHashTags.Count > 0) {
+            var t = communities;
+            communities = new();
+            foreach (var c in t) {
+                Db.LoadTags(c);
+                if (c.HashTags is null) {
+                    continue;
+                }
+                bool suitable = true;
+                foreach (var selectedHashTag in SelectedHashTags) {
+                    if (!c.HashTags.Contains(selectedHashTag)) {
+                        suitable = false;
+                        break;
+                    }
+                }
+                if (suitable) {
+                    communities.Add(c);
+                }
+            }
+        }
     }
 }

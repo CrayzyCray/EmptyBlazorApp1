@@ -2,16 +2,79 @@
 @using EmptyBlazorApp1.Entities
 @using EmptyBlazorApp1.Services
 
-@inject AuthenticationService AC
-@inject DbService DB
+@inject AuthenticationService As
+@inject DbService Db
 
-<h3>View</h3>
+<MudText>@Community?.Title</MudText>
+@if (_isSubscribed) {
+    <MudButton OnClick="UnsubscribeButtonOnClick" FullWidth Variant="Variant.Outlined" Color="Color.Inherit">Отписаться</MudButton>
+}
+else {
+    <MudButton OnClick="SubscribeButtonOnClick" Disabled="!_isAuthenticated" FullWidth Variant="Variant.Filled" Color="Color.Primary">Подписаться</MudButton>
+}
+<MudText>Подписчики: @_subscribersCount</MudText>
+<MudStack Row>
+@foreach(var tag in _tags) {
+    <MudChip Text="@tag.Name" />
+}
+</MudStack>
+<MudText>Описание: @Community?.Description</MudText>
+
+
+@if (_isCreatorMode) {
+    <MudButton OnClick="ToEdit" FullWidth Color="Color.Primary" Variant="Variant.Filled">Изменить</MudButton>
+}
+<MudButton FullWidth Color="Color.Inherit" OnClick="GoBackButtonOnClick">Назад</MudButton>
 
 @code {
-    [CascadingParameter] public Community? Community { get; set; }
-    bool _isCreatorMode;
+
+    [CascadingParameter]
+    public Community? Community { get; set; }
+
+    [Parameter]
+    public Action? GoBack { get; set; }
+    [Parameter]
+    public Action? ToEdit { get; set; }
+
+    bool _isCreatorMode = false;
+    int _subscribersCount = 0;
+    bool _isSubscribed = false;
+    bool _isAuthenticated = false;
+    List<CommunityHashTag> _tags = new();
+    User? _user;
+
+    void SubscribeButtonOnClick() {
+        if (_user is null || Community is null) {
+            return;
+        }
+        Db.Subscribe(_user, Community);
+        _isSubscribed = true;
+    }
+
+    void UnsubscribeButtonOnClick() {
+        if (_user is null || Community is null) {
+            return;
+        }
+        Db.Unsubscribe(_user, Community);
+        _isSubscribed = false;
+    }
 
     protected override void OnParametersSet() {
-        _isCreatorMode = Community.Creator.Id == AC.GetUser().Id;
+        _isAuthenticated = As.IsAuthorized();
+        
+        _user = As.GetUser();
+        if (_user is null || Community is null) {
+            return;
+        }
+        Db.LoadCreator(Community);
+        _tags = Db.GetTags(Community);
+        _isCreatorMode = Community.Creator.Id == _user.Id;
+        _subscribersCount = Db.GetSubscribersCount(Community);
+        _isSubscribed = Db.IsUserSubscribed(_user, Community);
     }
+
+    void GoBackButtonOnClick() {
+        GoBack?.Invoke();
+    }
+
 }
