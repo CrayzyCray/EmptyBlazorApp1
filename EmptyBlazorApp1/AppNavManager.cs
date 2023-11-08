@@ -18,11 +18,17 @@ public class AppNavManager {
         t.Item2 = parameters;
     }
 
-    public void NavigateTo(Type page, IDictionary<string, object>? parameters = null) {
+    public void NavigateTo(Type page) =>
+        NavigateTo(page, null as IDictionary<string, object>);
+
+    public void NavigateTo(Type page, Dictionary<string, object> parameters) =>
+        NavigateTo(page, parameters as IDictionary<string, object>);
+    
+    public void NavigateTo(Type page, IDictionary<string, object>? parameters) {
         if (_stack.Count >= MaxStackSize) {
             _stack.Clear();
         }
-
+    
         _stack.Push((page, parameters));
         _onNavigate(page, parameters);
     }

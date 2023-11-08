@@ -23,6 +23,7 @@ services.AddSingleton<DbService>();
 services.AddHttpContextAccessor();
 services.AddSingleton<AuthenticationService>();
 services.AddScoped<AccountService>();
+services.AddScoped<NavManager>();
 
 
 var app = builder.Build();

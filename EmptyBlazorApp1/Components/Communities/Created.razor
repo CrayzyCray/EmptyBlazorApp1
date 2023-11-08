@@ -5,6 +5,7 @@
 
 @inject DbService Db
 @inject AuthenticationService AS
+@inject NavManager NavManager
 
 <MudButton
     OnClick="() => NavManager.NavigateTo(typeof(Create))"
@@ -21,9 +22,6 @@
 }
 
 @code {
-
-    [CascadingParameter]
-    public AppNavManager NavManager { get; set; }
 
     [CascadingParameter]
     public List<CommunityHashTag>? SelectedHashTags { get; set; }

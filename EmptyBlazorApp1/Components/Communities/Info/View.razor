@@ -4,7 +4,13 @@
 
 @inject AuthenticationService As
 @inject DbService Db
+@inject NavManager NavManager 
 
+<MudStack Class="sticky" Row>
+    <MudSpacer/>
+    <MudIconButton Class="fixed" Icon="@Icons.Material.Filled.Close" OnClick="() => NavManager.GoBack()"></MudIconButton>
+
+</MudStack>
 <MudText>@Community?.Title</MudText>
 @if (_isSubscribed) {
     <MudButton OnClick="UnsubscribeButtonOnClick" FullWidth Variant="Variant.Outlined" Color="Color.Inherit">Отписаться</MudButton>
@@ -24,12 +30,8 @@ else {
 @if (_isCreatorMode) {
     <MudButton OnClick="ToEdit" FullWidth Color="Color.Primary" Variant="Variant.Filled">Изменить</MudButton>
 }
-<MudButton FullWidth Color="Color.Inherit" OnClick="() => NavManager.GoBack()">Назад</MudButton>
 
 @code {
-
-    [CascadingParameter]
-    public AppNavManager NavManager { get; set; }
 
     [CascadingParameter]
     public Community? Community { get; set; }

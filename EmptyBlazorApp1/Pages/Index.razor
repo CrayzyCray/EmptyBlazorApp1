@@ -9,10 +9,9 @@
 
 @inject AuthenticationService AuthenticationService
 @inject IDialogService DialogService
+@inject NavManager NavManager
 
-<CascadingValue Value="_navManager">
-    <DynamicComponent Type="@_currentPageType" Parameters="_currentParameters"/>
-</CascadingValue>
+<DynamicComponent Type="@_currentPageType" Parameters="_currentParameters"/>
 
 <MudAppBar Elevation="0" Bottom="true">
     <MudIconButton Class="flex-grow-1"
@@ -31,40 +30,38 @@
 
 @code {
     private IDictionary<string, object>? _currentParameters;
-    private Type _currentPageType = typeof(Communities);
-    private AppNavManager _navManager;
+    private Type _currentPageType = typeof(Calendar);
 
     void NavigateToCommunities() {
-        _navManager.ClearHistory();
-        _navManager.NavigateTo(typeof(Communities));
+        NavManager.NavigateTo(typeof(Communities));
     }
 
     void NavigateToCalendar() {
-        _navManager.ClearHistory();
-        _navManager.NavigateTo(typeof(Calendar));
+        NavManager.NavigateTo(typeof(Calendar));
     }
 
     void NavigateToProfile() {
         if (AuthenticationService.IsAuthorized()) {
-            _navManager.ClearHistory();
-            _navManager.NavigateTo(typeof(Profile));
+            NavManager.NavigateTo(typeof(Profile));
+            return;
         }
-        else {
-            var parameters = new DialogParameters<Dialog> {
-                { "ContentText", "Для просмотра этой страницы требуется регистрация" },
-                { "ButtonText", "Регистрация" },
-                { "Callback", () => _navManager.NavigateTo(typeof(Login)) }
-            };
-            DialogService.Show<Dialog>("Требуется регистрация", parameters);
-        }
+
+        var parameters = new DialogParameters<Dialog> {
+            { "ContentText", "Для просмотра этой страницы требуется регистрация" },
+            { "ButtonText", "Регистрация" },
+            { "Callback", () => NavManager.NavigateTo(typeof(Login)) }
+        };
+        DialogService.Show<Dialog>("Требуется регистрация", parameters);
     }
 
-    protected override void OnInitialized() {
-        _navManager = new AppNavManager(_currentPageType, (page, parameters) => {
-            _currentPageType = page;
-            _currentParameters = parameters;
-            StateHasChanged();
-        });
+    protected override void OnParametersSet() {
+        NavManager.Initialize(
+            _currentPageType,
+            (page, parameters) => {
+                _currentPageType = page;
+                _currentParameters = parameters;
+                StateHasChanged();
+            });
     }
 
 }

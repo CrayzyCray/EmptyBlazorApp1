@@ -3,6 +3,7 @@
 
 @inject AuthenticationService AuthenticationService
 @inject IJSRuntime JS
+@inject NavManager NavManager 
 
 <MudTabs Elevation="4" Rounded="true" Centered="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
     <MudTabPanel Text="Login">
@@ -31,16 +32,12 @@
     string _login = string.Empty;
     string _password = string.Empty;
 
-    [CascadingParameter]
-    public AppNavManager NavManager { get; set; }
-
     string? errorMessage;
 
     private void LoginButtonOnClick() {
         var (success, str) = AuthenticationService.TryAuthorize(_login, _password);
         if (success) {
             JS.InvokeAsync<object>("setCookieMy", AuthenticationService.SessionIdCode, str);
-            NavManager.ClearHistory();
             NavManager.NavigateTo(typeof(Profile.Profile));
         }
         errorMessage = str;
@@ -50,7 +47,6 @@
         var (success, str) = AuthenticationService.TryRegister(_login, _password);
         if (success) {
             JS.InvokeAsync<object>("setCookieMy", AuthenticationService.SessionIdCode, str);
-            NavManager.ClearHistory();
             NavManager.NavigateTo(typeof(Profile.Profile));
         }
         errorMessage = str;

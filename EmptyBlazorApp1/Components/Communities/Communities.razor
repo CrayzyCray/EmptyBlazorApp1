@@ -4,32 +4,35 @@
 
 @inject AuthenticationService AuthenticationService
 @inject DbService Db
+@inject NavManager NavManager
 
-<CascadingValue TValue="Action<Community>" Value="OpenCommunityMenu">
-    <CascadingValue Value="_selectedTags">
-        <MudStack Spacing="2" Class="pa-2">
-            <MudText Typo="Typo.h5" Align="Align.Center">Сообщества</MudText>
-            <MudDivider/>
-            <MudSelect T="Type" @bind-Value="@_componentType" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter">
-                <MudSelectItem Value="typeof(All)">Все сообщества</MudSelectItem>
-                <MudSelectItem Value="typeof(Subscriptions)" Disabled="!AuthenticationService.IsAuthorized()">Подписки</MudSelectItem>
-                <MudSelectItem Value="typeof(Created)" Disabled="!AuthenticationService.IsAuthorized()">Созданные</MudSelectItem>
-            </MudSelect>
+<CascadingValue Value="_selectedTags">
+    <MudStack Spacing="2" Class="pa-2">
+        <MudText Typo="Typo.h5" Align="Align.Center">Сообщества</MudText>
+        <MudDivider/>
+        <MudSelect T="Type" @bind-Value="@_componentType" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter" SelectedValuesChanged="() => SaveState()">
+            <MudSelectItem Value="typeof(All)">Все сообщества</MudSelectItem>
+            <MudSelectItem Value="typeof(Subscriptions)" Disabled="!AuthenticationService.IsAuthorized()">Подписки</MudSelectItem>
+            <MudSelectItem Value="typeof(Created)" Disabled="!AuthenticationService.IsAuthorized()">Созданные</MudSelectItem>
+        </MudSelect>
 
-            <MudSelect T="CommunityHashTag" Variant="Variant.Outlined" AnchorOrigin="Origin.BottomCenter" MultiSelection SelectedValuesChanged="TagSelectedChanges">
-                @foreach (var tag in _availableTags) {
-                    <MudSelectItem Value="@tag">@tag.Name</MudSelectItem>
-                }
-            </MudSelect>
-            <DynamicComponent Type="@_componentType" Parameters="@_componentsParameters.GetValueOrDefault(_componentType)"/>
-        </MudStack>
-    </CascadingValue>
+        <MudSelect
+            T="CommunityHashTag"
+            Variant="Variant.Outlined"
+            AnchorOrigin="Origin.BottomCenter"
+            MultiSelection
+            SelectedValuesChanged="TagSelectedChanges"
+            SelectedValues="@_selectedTags">
+
+            @foreach (var tag in _availableTags) {
+                <MudSelectItem Value="@tag">@tag.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <DynamicComponent Type="@_componentType" Parameters="@_componentsParameters.GetValueOrDefault(_componentType)"/>
+    </MudStack>
 </CascadingValue>
 
 @code {
-
-    [CascadingParameter]
-    public AppNavManager NavManager { get; set; }
 
     [Parameter]
     public List<CommunityHashTag>? SelectedTags { get; set; }
@@ -42,17 +45,25 @@
     private List<CommunityHashTag> _selectedTags = new();
     private List<CommunityHashTag> _availableTags = new();
 
+    private IEnumerable<CommunityHashTag> _selectedValues;
+
     protected override void OnParametersSet() {
+        _componentType = StartPage ?? _componentType;
         _selectedTags = SelectedTags ?? _selectedTags;
         _availableTags = Db.GetAvailableCommunityHashTags();
     }
 
-    void OpenCommunityMenu(Community community) {
-        NavManager.NavigateTo(typeof(Info.Info), new Dictionary<string, object> { { "Community", community } });
-    }
-
     void TagSelectedChanges(IEnumerable<CommunityHashTag> selected) {
         _selectedTags = new(selected);
+        SaveState();
+    }
+
+    void SaveState() {
+        NavManager.SetCurrentPageParameters(
+            new() {
+                { "SelectedTags", _selectedTags },
+                { "StartPage", _componentType }
+            });
     }
 
 }

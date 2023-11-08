@@ -14,10 +14,11 @@
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet"/>
 
     <link href="css/site.css" rel="stylesheet"/>
-    <link rel="manifest" href="manifest.json" />
+    <link rel="manifest" href="manifest.json"/>
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered"/>
 </head>
 <body>
+
 <component type="typeof(App)" render-mode="ServerPrerendered"/>
 
 <div id="blazor-error-ui">
@@ -33,43 +34,7 @@
 
 <script src="_framework/blazor.server.js"></script>
 <script src="_content/MudBlazor/MudBlazor.min.js"></script>
-<script>
-    function reloadPage(){
-       window.location.reload();
-    }
-    
-    function deleteCookie(name) {
-        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC;';
-    }
-    
-    function setCookieMy(name, value) {
-          document.cookie = name + "=" + value + "; secure;";
-    }
-    function getCookieValue(key) {
-      // Get the document.cookie string
-      let cookieString = document.cookie;
-      // Split the cookie string by semicolons into an array of key-value pairs
-      let cookieArray = cookieString.split(";");
-      // Loop through the cookie array
-      for (let i = 0; i < cookieArray.length; i++) {
-        // Trim any leading or trailing spaces from the current pair
-        let pair = cookieArray[i].trim();
-        // Split the pair by the equal sign into an array of key and value
-        let keyValue = pair.split("=");
-        // If the key matches the parameter, return the value
-        if (keyValue[0] === key) {
-          return keyValue[1];
-        }
-      }
-      // If no match is found, return null
-      return null;
-    }
-
-</script>
+<script src="Js/main.js"></script>
 
 </body>
 </html>
-@{
-    var e = this.HttpContext;
-    //Console.WriteLine("_Host.cshtml");
-}

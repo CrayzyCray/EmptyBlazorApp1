@@ -4,6 +4,7 @@
 
 @inject AuthenticationService AS
 @inject DbService DB
+@inject NavManager NavManager
 
 <MudStack Class="pa-2">
     <MudTextField @bind-Value="_community.Title"
@@ -45,9 +46,6 @@
 
 
 @code {
-
-    [CascadingParameter]
-    public AppNavManager NavManager { get; set; }
 
     public IEnumerable<CommunityHashTag> SelectedValues = new List<CommunityHashTag>();
 
