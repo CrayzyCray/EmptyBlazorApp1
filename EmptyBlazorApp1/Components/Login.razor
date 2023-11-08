@@ -2,7 +2,6 @@
 @using EmptyBlazorApp1.Services
 
 @inject AuthenticationService AuthenticationService
-@inject NavigationManager Navigation
 @inject IJSRuntime JS
 
 <MudTabs Elevation="4" Rounded="true" Centered="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
@@ -33,7 +32,7 @@
     string _password = string.Empty;
 
     [CascadingParameter]
-    public AppNavigationManager NavManager { get; set; }
+    public AppNavManager NavManager { get; set; }
 
     string? errorMessage;
 

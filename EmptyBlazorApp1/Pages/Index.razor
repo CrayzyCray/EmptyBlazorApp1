@@ -32,7 +32,7 @@
 @code {
     private IDictionary<string, object>? _currentParameters;
     private Type _currentPageType = typeof(Communities);
-    private AppNavigationManager _navManager;
+    private AppNavManager _navManager;
 
     void NavigateToCommunities() {
         _navManager.ClearHistory();
@@ -50,16 +50,17 @@
             _navManager.NavigateTo(typeof(Profile));
         }
         else {
-            var parameters = new DialogParameters<Dialog>();
-            parameters.Add("ContentText", "Для просмотра этой страницы требуется регистрация");
-            parameters.Add("ButtonText", "Регистрация");
-            parameters.Add("Callback", () => _navManager.NavigateTo(typeof(Login)));
+            var parameters = new DialogParameters<Dialog> {
+                { "ContentText", "Для просмотра этой страницы требуется регистрация" },
+                { "ButtonText", "Регистрация" },
+                { "Callback", () => _navManager.NavigateTo(typeof(Login)) }
+            };
             DialogService.Show<Dialog>("Требуется регистрация", parameters);
         }
     }
 
     protected override void OnInitialized() {
-        _navManager = new(_currentPageType, (page, parameters) => {
+        _navManager = new AppNavManager(_currentPageType, (page, parameters) => {
             _currentPageType = page;
             _currentParameters = parameters;
             StateHasChanged();

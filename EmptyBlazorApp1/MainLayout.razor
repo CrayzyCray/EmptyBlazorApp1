@@ -1,10 +1,17 @@
 ﻿@using MudBlazor
+@using MudBlazor.Utilities
+
 @inherits LayoutComponentBase
 
-<MudThemeProvider IsDarkMode/>
+<MudThemeProvider IsDarkMode Theme="_mudTheme"/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
- <MudLayout>
+<MudLayout>
     @Body
 </MudLayout>
+
+@code {
+    static PaletteDark _paletteDark = new();
+    static MudTheme _mudTheme = new() { PaletteDark = _paletteDark };
+}

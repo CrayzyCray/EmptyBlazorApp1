@@ -6,25 +6,31 @@
 @inject DbService Db
 @inject AuthenticationService AS
 
-<MudButton 
-    OnClick="NavigateToCreate"
-    FullWidth="true" 
-    Variant="Variant.Outlined" 
-    Color="Color.Success" >Создать сообщество</MudButton>
+<MudButton
+    OnClick="() => NavManager.NavigateTo(typeof(Create))"
+    FullWidth="true"
+    Variant="Variant.Outlined"
+    Color="Color.Success">
+    Создать сообщество
+</MudButton>
 
-@if (communities is not null)
+@if (communities is not null) {
     @foreach (var community in communities) {
-        <СommunityCard Community="community" />
+        <СommunityCard Community="community"/>
     }
+}
 
 @code {
+
+    [CascadingParameter]
+    public AppNavManager NavManager { get; set; }
+
     [CascadingParameter]
     public List<CommunityHashTag>? SelectedHashTags { get; set; }
-    [Parameter] public Action? NavigateToCreate { get; set; }
+
     List<Community>? communities;
 
     protected override void OnParametersSet() {
-        
         var user = AS.GetUserWithProfile();
         if (user is null)
             return;
@@ -49,5 +55,9 @@
                 }
             }
         }
+    }
+
+    public override string ToString() {
+        return "Созданные";
     }
 }

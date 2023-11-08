@@ -1,6 +1,6 @@
 namespace EmptyBlazorApp1;
 
-public class AppNavigationManager {
+public class AppNavManager {
     private readonly Type _defaultPage;
 
     private readonly Action<Type, IDictionary<string, object>?>  _onNavigate;
@@ -8,9 +8,14 @@ public class AppNavigationManager {
 
     const int MaxStackSize = 10;
 
-    public AppNavigationManager(Type defaultPage, Action<Type, IDictionary<string, object>?> onNavigate) {
+    public AppNavManager(Type defaultPage, Action<Type, IDictionary<string, object>?> onNavigate) {
         _defaultPage = defaultPage;
         _onNavigate  = onNavigate;
+    }
+    
+    public void SetCurrentPageParameters(IDictionary<string, object> parameters) {
+        var t = _stack.Peek();
+        t.Item2 = parameters;
     }
 
     public void NavigateTo(Type page, IDictionary<string, object>? parameters = null) {
@@ -23,20 +28,17 @@ public class AppNavigationManager {
     }
 
     public void GoBack() {
-        if (_stack.Count == 1) {
+        if (_stack.Count <= 1) {
             _stack.Clear();
-        }
-
-        if (_stack.Count == 0) {
-            NavigateTo(_defaultPage, null);
+            NavigateTo(_defaultPage);
             return;
         }
 
         _stack.Pop();
-        var page = _stack.Pop();
+        var page = _stack.Peek();
         NavigateTo(page.Item1, page.Item2);
     }
-    
+
     public void ClearHistory() {
         _stack.Clear();
     }

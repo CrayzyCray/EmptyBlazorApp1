@@ -5,7 +5,7 @@
 @inject AuthenticationService AS
 @inject DbService DB
 
-<MudStack>
+<MudStack Class="pa-2">
     <MudTextField @bind-Value="_community.Title"
                   Variant="Variant.Outlined"
                   Label="Название"/>
@@ -36,7 +36,7 @@
     </MudButton>
 
     <MudButton
-        OnClick="NavigateToList"
+        OnClick="() => NavManager.GoBack()"
         Variant="Variant.Text"
         Color="Color.Inherit">
         Отмена
@@ -45,14 +45,15 @@
 
 
 @code {
-    public IEnumerable<CommunityHashTag> SelectedValues = new List<CommunityHashTag>();
 
-    [Parameter]
-    public Action? NavigateToList { get; set; }
+    [CascadingParameter]
+    public AppNavManager NavManager { get; set; }
+
+    public IEnumerable<CommunityHashTag> SelectedValues = new List<CommunityHashTag>();
 
     Community _community = new();
     User? _user;
-    string? errorMessage = null;
+    string? errorMessage;
     List<CommunityHashTag> availableTags = new();
 
     protected override void OnInitialized() {
@@ -70,7 +71,7 @@
 
         DB.AddCommunity(_community);
 
-        NavigateToList?.Invoke();
+        NavManager.GoBack();
     }
 
     bool Validate() {
@@ -92,7 +93,7 @@
         }
         return true;
     }
-    
+
     protected override void OnParametersSet() {
         availableTags = DB.GetAvailableCommunityHashTags();
     }
