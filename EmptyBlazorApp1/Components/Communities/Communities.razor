@@ -28,6 +28,9 @@
 
 @code {
 
+    [CascadingParameter]
+    public AppNavManager NavManager { get; set; }
+
     [Parameter]
     public List<CommunityHashTag>? SelectedTags { get; set; }
 
@@ -45,23 +48,7 @@
     }
 
     void OpenCommunityMenu(Community community) {
-        var currentComponent = _componentType;
-        _componentsParameters = new() {
-            {
-                typeof(Info.Info),
-                new() {
-                    { "Community", community }, {
-                        "GoBack", () => {
-                            _componentType = currentComponent;
-                            StateHasChanged();
-                        }
-                    }
-                }
-            }
-        };
-
-        _componentType = typeof(Info.Info);
-        StateHasChanged();
+        NavManager.NavigateTo(typeof(Info.Info), new Dictionary<string, object> { { "Community", community } });
     }
 
     void TagSelectedChanges(IEnumerable<CommunityHashTag> selected) {

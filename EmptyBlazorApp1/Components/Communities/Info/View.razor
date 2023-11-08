@@ -14,9 +14,9 @@ else {
 }
 <MudText>Подписчики: @_subscribersCount</MudText>
 <MudStack Row>
-@foreach(var tag in _tags) {
-    <MudChip Text="@tag.Name" />
-}
+    @foreach (var tag in _tags) {
+        <MudChip Text="@tag.Name"/>
+    }
 </MudStack>
 <MudText>Описание: @Community?.Description</MudText>
 
@@ -24,15 +24,16 @@ else {
 @if (_isCreatorMode) {
     <MudButton OnClick="ToEdit" FullWidth Color="Color.Primary" Variant="Variant.Filled">Изменить</MudButton>
 }
-<MudButton FullWidth Color="Color.Inherit" OnClick="GoBackButtonOnClick">Назад</MudButton>
+<MudButton FullWidth Color="Color.Inherit" OnClick="() => NavManager.GoBack()">Назад</MudButton>
 
 @code {
 
     [CascadingParameter]
+    public AppNavManager NavManager { get; set; }
+
+    [CascadingParameter]
     public Community? Community { get; set; }
 
-    [Parameter]
-    public Action? GoBack { get; set; }
     [Parameter]
     public Action? ToEdit { get; set; }
 
@@ -61,7 +62,7 @@ else {
 
     protected override void OnParametersSet() {
         _isAuthenticated = As.IsAuthorized();
-        
+
         _user = As.GetUser();
         if (_user is null || Community is null) {
             return;
@@ -71,10 +72,6 @@ else {
         _isCreatorMode = Community.Creator.Id == _user.Id;
         _subscribersCount = Db.GetSubscribersCount(Community);
         _isSubscribed = Db.IsUserSubscribed(_user, Community);
-    }
-
-    void GoBackButtonOnClick() {
-        GoBack?.Invoke();
     }
 
 }

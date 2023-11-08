@@ -13,14 +13,12 @@
     private Type _componentType = typeof(View);
     private Dictionary<Type, Dictionary<string, object>> _componentsParameters;
     [Parameter] public Community? Community { get; set; }
-    [Parameter] public Action? GoBack { get; set; }
 
     protected override void OnParametersSet() {
         _componentsParameters = new() {
             {
                 typeof(View),
                 new() {
-                    { "GoBack", GoBack! },
                     { "ToEdit", () => { _componentType = typeof(Edit); StateHasChanged();} }
                 }
             },
